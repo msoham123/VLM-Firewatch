@@ -35,7 +35,7 @@ class DatasetAggregator:
             flame_data = self.loader.load_flame_original_dataset(flame_path)
             all_data.extend(flame_data)
         else:
-            print(f"FLAME path {flame_path} not found, skipping...")
+            print(f"FLAME path not found, skipping...")
         
 
         if flame3_path:
@@ -43,14 +43,14 @@ class DatasetAggregator:
             flame3_data = self.loader.load_flame3_dataset(flame3_path)
             all_data.extend(flame3_data)
         else:
-            print(f"FLAME3 path {flame3_data} not found, skipping...")
+            print(f"FLAME3 path not found, skipping...")
 
         if flamevision_path:
             print(f"Aggregrating modified FlameVision dataset from {flamevision_path}")
             flamevision_data = self.loader.load_flamevision_dataset(flamevision_path)
             all_data.extend(flamevision_data)
         else:
-            print(f"FlameVision path {flamevision_data} not found, skipping...")
+            print(f"FlameVision path not found, skipping...")
 
         print(f"\nTotal aggregated samples: {len(all_data)}")
         self._print_dataset_stats(all_data)

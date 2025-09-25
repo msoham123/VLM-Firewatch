@@ -286,4 +286,3 @@ class DatasetLoader:
             vqa_item["metadata"]["original_split"] = split
             
         return vqa_item
-

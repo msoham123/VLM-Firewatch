@@ -1,18 +1,15 @@
 flame_config = {
-    "src": "",
-    "dst": ""
+    "src": "/home/hice1/smanoli3/scratch/datasets/FLAME/Training",
 }
 
 flame3_config = {
     "src": "",
-    "dst": ""
 }
 
 flamevision_config = {
     "src": "",
-    "dst": ""
 }
 
 unified_config = {
-    "src": ""
+    "src": "/home/hice1/smanoli3/scratch/datasets/unified_dataset"
 }
