@@ -11,8 +11,11 @@ class DatasetAggregator:
     Handles dataset aggregation, statistics, splitting, and saving functionality
     """
 
-    def aggregate_datasets(self, flame_loader: DatasetLoader = None, flame3_loader: str = DatasetLoader, 
-                          flamevision_loader: DatasetLoader = None) -> List[Dict]:
+    def __init__(self, loader: DatasetLoader):
+        self.loader = loader
+
+    def aggregate_datasets(self, flame_path: str = None, flame3_path: str = None, 
+                          flamevision_path: str = None) -> List[Dict]:
         """
         Aggregate all FLAME datasets into unified VQA format
         
@@ -26,39 +29,28 @@ class DatasetAggregator:
         """
         all_data = []
         
-        # Dataset loaders 
-        self.flame_loader = flame_loader
-        self.flame3_loader = flame3_loader
-        self.flamevision_loader = flamevision_loader
-        
-        # Load each dataset if path exists and loader is available
-        if self.flame_loader:
+        # Load each dataset if path exists
+        if flame_path:
             print(f"Aggregrating modified FLAME dataset from {flame_path}")
-            flame_data = self.flame_loader(flame_path)
+            flame_data = self.loader.load_flame_original_dataset(flame_path)
             all_data.extend(flame_data)
-        elif Path(flame_path).exists():
-            print(f"FLAME path exists but no loader provided, skipping...")
         else:
             print(f"FLAME path {flame_path} not found, skipping...")
         
-        if Path(flame3_path).exists() and self.flame3_loader:
-            print(f"Loading FLAME3 dataset from {flame3_path}")
-            flame3_data = self.flame3_loader(flame3_path)
+
+        if flame3_path:
+            print(f"Aggregrating modified FLAME3 dataset from {flame3_path}")
+            flame3_data = self.loader.load_flame3_dataset(flame3_path)
             all_data.extend(flame3_data)
-        elif Path(flame3_path).exists():
-            print(f"FLAME3 path exists but no loader provided, skipping...")
         else:
-            print(f"FLAME3 path {flame3_path} not found, skipping...")
-        
-        if Path(flamevision_path).exists() and self.flamevision_loader:
-            print(f"Loading FlameVision dataset from {flamevision_path}")
-            flamevision_data = self.flamevision_loader(flamevision_path)
+            print(f"FLAME3 path {flame3_data} not found, skipping...")
+
+        if flamevision_path:
+            print(f"Aggregrating modified FlameVision dataset from {flamevision_path}")
+            flamevision_data = self.loader.load_flamevision_dataset(flamevision_path)
             all_data.extend(flamevision_data)
-        elif Path(flamevision_path).exists():
-            print(f"FlameVision path exists but no loader provided, skipping...")
         else:
-            print(f"FlameVision path {flamevision_path} not found, skipping...")
-        
+            print(f"FlameVision path {flamevision_data} not found, skipping...")
 
         print(f"\nTotal aggregated samples: {len(all_data)}")
         self._print_dataset_stats(all_data)
@@ -191,3 +183,21 @@ class DatasetAggregator:
             "thermal_percentage": thermal_available/total_samples*100 if total_samples > 0 else 0,
             "datasets": datasets
         }
+
+    def save_vqa_dataset(self, data: List[Dict], output_path: str, split_name: str = ""):
+        """Save VQA dataset to JSON file"""
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        if split_name:
+            filename = f"flame_vqa_{split_name}.json"
+        else:
+            filename = "flame_vqa_dataset.json"
+        
+        output_file = output_path.parent / filename
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        
+        print(f"Saved {len(data)} samples to {output_file}")
+        return str(output_file)

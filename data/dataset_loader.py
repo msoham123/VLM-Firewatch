@@ -15,8 +15,7 @@ class DatasetLoader:
     Converts datasets to VQA format for Visual Language Model training
     """
     
-    def __init__(self, base_path: str):
-        self.base_path = Path(base_path)
+    def __init__(self):
 
         # VQA question templates for fire detection
         self.fire_questions = [
@@ -288,21 +287,3 @@ class DatasetLoader:
             
         return vqa_item
 
-
-    def save_vqa_dataset(self, data: List[Dict], output_path: str, split_name: str = ""):
-        """Save VQA dataset to JSON file"""
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        if split_name:
-            filename = f"flame_vqa_{split_name}.json"
-        else:
-            filename = "flame_vqa_dataset.json"
-        
-        output_file = output_path.parent / filename
-        
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        
-        print(f"Saved {len(data)} samples to {output_file}")
-        return str(output_file)
