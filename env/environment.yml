@@ -16,3 +16,5 @@ dependencies:
     - einops
     - Pillow
     - bitsandbytes
+    - timm
+    - scikit-learn
