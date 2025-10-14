@@ -48,6 +48,7 @@ class DatasetLoader:
         Load FLAME3 dataset and convert to VQA format
         FLAME3 contains 622 Fire quartets and 116 No Fire quartets
         Each quartet: RGB, Thermal, Corrected FOV RGB, Thermal TIFF
+        Structure: Fire/RGB/Raw/, Fire/Thermal/, No Fire/RGB/Raw/, No Fire/Thermal/Raw JPG/
         """
         flame3_data = []
         flame3_path = Path(flame3_path)
@@ -56,26 +57,29 @@ class DatasetLoader:
             print(f"FLAME3 path {flame3_path} does not exist")
             return []
         
-        # Look for typical FLAME3 structure
-        possible_structures = [
-            # Structure 1: Direct Fire/NoFire folders
-            {"fire": flame3_path / "Fire", "no_fire": flame3_path / "NoFire"},
-            # Structure 2: Nested in dataset folder
-            {"fire": flame3_path / "flame-3-computer-vision-subset-sycan-marsh" / "Fire", 
-             "no_fire": flame3_path / "flame-3-computer-vision-subset-sycan-marsh" / "NoFire"},
+        # Look for FLAME3 structure with nested directories
+        fire_dir = flame3_path / "Fire"
+        no_fire_dir = flame3_path / "No Fire"
+        
+        if not fire_dir.exists() or not no_fire_dir.exists():
+            print(f"FLAME3 structure not found. Expected Fire/ and No Fire/ directories")
+            return []
+        
+        print(f"Found FLAME3 structure at {flame3_path}")
+        
+        # Process Fire images from all subdirectories
+        print("Processing FLAME3 Fire images...")
+        fire_image_dirs = [
+            fire_dir / "RGB" / "Raw",
+            fire_dir / "RGB" / "Corrected FOV", 
+            fire_dir / "Thermal"
         ]
         
-        for structure in possible_structures:
-            fire_dir = structure["fire"]
-            no_fire_dir = structure["no_fire"]
-            
-            if fire_dir.exists() and no_fire_dir.exists():
-                print(f"Found FLAME3 structure at {fire_dir.parent}")
-                
-                # Process Fire images
-                print("Processing FLAME3 Fire images...")
-                fire_images = list(fire_dir.glob("*.jpg")) + list(fire_dir.glob("*.png")) + list(fire_dir.glob("*.tiff"))
-                for img_file in tqdm(fire_images):
+        for img_dir in fire_image_dirs:
+            if img_dir.exists():
+                print(f"  Processing {img_dir.name} images...")
+                fire_images = list(img_dir.glob("*.jpg")) + list(img_dir.glob("*.png")) + list(img_dir.glob("*.tiff")) + list(img_dir.glob("*.JPG"))
+                for img_file in tqdm(fire_images, desc=f"  {img_dir.name}"):
                     vqa_item = self._create_vqa_item(
                         image_path=str(img_file),
                         has_fire=True,
@@ -83,11 +87,21 @@ class DatasetLoader:
                         thermal_available=True
                     )
                     flame3_data.append(vqa_item)
-                
-                # Process NoFire images
-                print("Processing FLAME3 NoFire images...")
-                no_fire_images = list(no_fire_dir.glob("*.jpg")) + list(no_fire_dir.glob("*.png")) + list(no_fire_dir.glob("*.tiff"))
-                for img_file in tqdm(no_fire_images):
+        
+        # Process No Fire images from all subdirectories
+        print("Processing FLAME3 No Fire images...")
+        no_fire_image_dirs = [
+            no_fire_dir / "RGB" / "Raw",
+            no_fire_dir / "RGB" / "Corrected FOV",
+            no_fire_dir / "Thermal" / "Raw JPG",
+            no_fire_dir / "Thermal" / "Celsius TIFF"
+        ]
+        
+        for img_dir in no_fire_image_dirs:
+            if img_dir.exists():
+                print(f"  Processing {img_dir.name} images...")
+                no_fire_images = list(img_dir.glob("*.jpg")) + list(img_dir.glob("*.png")) + list(img_dir.glob("*.tiff")) + list(img_dir.glob("*.JPG"))
+                for img_file in tqdm(no_fire_images, desc=f"  {img_dir.name}"):
                     vqa_item = self._create_vqa_item(
                         image_path=str(img_file),
                         has_fire=False,
@@ -95,7 +109,6 @@ class DatasetLoader:
                         thermal_available=True
                     )
                     flame3_data.append(vqa_item)
-                break
         
         print(f"Loaded {len(flame3_data)} samples from FLAME3")
         return flame3_data
@@ -132,8 +145,8 @@ class DatasetLoader:
         
         print(f"Found FlameVision at {classification_dir}")
         
-        # Process all splits (train, val, test)
-        for split in ["train", "val", "test"]:
+        # Process all splits (train, valid, test)
+        for split in ["train", "valid", "test"]:
             split_dir = classification_dir / split
             if not split_dir.exists():
                 continue

@@ -13,12 +13,36 @@ def main():
 
     aggregrator = DatasetAggregator(loader)
     
+    # Get aggregation plan
+    print("Generating aggregation plan...")
+    plan = aggregrator.get_aggregation_plan(
+        flame_path=flame_config["src"],
+        flame3_path=flame3_config["src"],
+        flamevision_path=flamevision_config["src"]
+    )
+    
+    print(f"\n📋 AGGREGATION PLAN")
+    print(f"Total datasets configured: {plan['total_datasets']}")
+    print(f"Available datasets: {plan['available_datasets']}")
+    print(f"Expected total samples: ~{sum([738, 8600, 1500])} (FLAME3 + FlameVision + FLAME)")
+    
+    print("\nDataset details:")
+    for dataset_name, details in plan['datasets'].items():
+        status = "✅ Available" if details['available'] else "❌ Not found"
+        print(f"  {dataset_name}: {status}")
+        print(f"    Path: {details['path']}")
+        print(f"    Expected: {details['expected_samples']}")
+    
+    if plan['available_datasets'] == 0:
+        print("\n⚠️  No datasets are available! Please check the paths in dataset_configs.py")
+        return
+    
     # Load and aggregate datasets
-    print("Loading and aggregating FLAME datasets...")
+    print(f"\n🚀 Starting aggregation of {plan['available_datasets']} available datasets...")
     all_data = aggregrator.aggregate_datasets(
         flame_path=flame_config["src"],
-        # flame3_path=flame3_config["src"],
-        # flamevision_path=flamevision_config["src"]
+        flame3_path=flame3_config["src"],
+        flamevision_path=flamevision_config["src"]
     )
     
     if not all_data:

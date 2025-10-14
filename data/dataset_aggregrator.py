@@ -14,6 +14,77 @@ class DatasetAggregator:
     def __init__(self, loader: DatasetLoader):
         self.loader = loader
 
+    def validate_dataset_paths(self, flame_path: str = None, flame3_path: str = None, 
+                              flamevision_path: str = None) -> Dict[str, bool]:
+        """
+        Validate that dataset paths exist and are accessible
+        
+        Args:
+            flame_path: Path to original FLAME dataset
+            flame3_path: Path to FLAME3 dataset  
+            flamevision_path: Path to FlameVision dataset
+            
+        Returns:
+            Dictionary mapping dataset names to validation status
+        """
+        validation_results = {}
+        
+        if flame_path:
+            validation_results["FLAME"] = Path(flame_path).exists()
+        else:
+            validation_results["FLAME"] = False
+            
+        if flame3_path:
+            validation_results["FLAME3"] = Path(flame3_path).exists()
+        else:
+            validation_results["FLAME3"] = False
+            
+        if flamevision_path:
+            validation_results["FlameVision"] = Path(flamevision_path).exists()
+        else:
+            validation_results["FlameVision"] = False
+            
+        return validation_results
+
+    def get_aggregation_plan(self, flame_path: str = None, flame3_path: str = None, 
+                           flamevision_path: str = None) -> Dict:
+        """
+        Get a plan of what datasets will be aggregated
+        
+        Args:
+            flame_path: Path to original FLAME dataset
+            flame3_path: Path to FLAME3 dataset  
+            flamevision_path: Path to FlameVision dataset
+            
+        Returns:
+            Dictionary with aggregation plan details
+        """
+        validation_results = self.validate_dataset_paths(flame_path, flame3_path, flamevision_path)
+        
+        plan = {
+            "total_datasets": len([p for p in [flame_path, flame3_path, flamevision_path] if p]),
+            "available_datasets": sum(validation_results.values()),
+            "datasets": {
+                "FLAME": {
+                    "path": flame_path,
+                    "available": validation_results["FLAME"],
+                    "expected_samples": "~1000-2000 (varies by structure)"
+                },
+                "FLAME3": {
+                    "path": flame3_path,
+                    "available": validation_results["FLAME3"],
+                    "expected_samples": "738 (622 Fire + 116 No Fire quartets)"
+                },
+                "FlameVision": {
+                    "path": flamevision_path,
+                    "available": validation_results["FlameVision"],
+                    "expected_samples": "8600 (5000 fire + 3600 no-fire)"
+                }
+            }
+        }
+        
+        return plan
+
     def aggregate_datasets(self, flame_path: str = None, flame3_path: str = None, 
                           flamevision_path: str = None) -> List[Dict]:
         """
@@ -28,32 +99,70 @@ class DatasetAggregator:
             List of VQA formatted dataset items
         """
         all_data = []
+        dataset_counts = {}
+        
+        print("="*60)
+        print("STARTING DATASET AGGREGATION")
+        print("="*60)
         
         # Load each dataset if path exists
         if flame_path:
-            print(f"Aggregrating modified FLAME dataset from {flame_path}")
-            flame_data = self.loader.load_flame_original_dataset(flame_path)
-            all_data.extend(flame_data)
+            print(f"\n🔄 Loading FLAME dataset from: {flame_path}")
+            try:
+                flame_data = self.loader.load_flame_original_dataset(flame_path)
+                all_data.extend(flame_data)
+                dataset_counts["FLAME"] = len(flame_data)
+                print(f"✅ Successfully loaded {len(flame_data)} samples from FLAME")
+            except Exception as e:
+                print(f"❌ Error loading FLAME dataset: {e}")
+                dataset_counts["FLAME"] = 0
         else:
-            print(f"FLAME path not found, skipping...")
-        
+            print(f"⚠️  FLAME path not provided, skipping...")
+            dataset_counts["FLAME"] = 0
 
         if flame3_path:
-            print(f"Aggregrating modified FLAME3 dataset from {flame3_path}")
-            flame3_data = self.loader.load_flame3_dataset(flame3_path)
-            all_data.extend(flame3_data)
+            print(f"\n🔄 Loading FLAME3 dataset from: {flame3_path}")
+            try:
+                flame3_data = self.loader.load_flame3_dataset(flame3_path)
+                all_data.extend(flame3_data)
+                dataset_counts["FLAME3"] = len(flame3_data)
+                print(f"✅ Successfully loaded {len(flame3_data)} samples from FLAME3")
+            except Exception as e:
+                print(f"❌ Error loading FLAME3 dataset: {e}")
+                dataset_counts["FLAME3"] = 0
         else:
-            print(f"FLAME3 path not found, skipping...")
+            print(f"⚠️  FLAME3 path not provided, skipping...")
+            dataset_counts["FLAME3"] = 0
 
         if flamevision_path:
-            print(f"Aggregrating modified FlameVision dataset from {flamevision_path}")
-            flamevision_data = self.loader.load_flamevision_dataset(flamevision_path)
-            all_data.extend(flamevision_data)
+            print(f"\n🔄 Loading FlameVision dataset from: {flamevision_path}")
+            try:
+                flamevision_data = self.loader.load_flamevision_dataset(flamevision_path)
+                all_data.extend(flamevision_data)
+                dataset_counts["FlameVision"] = len(flamevision_data)
+                print(f"✅ Successfully loaded {len(flamevision_data)} samples from FlameVision")
+            except Exception as e:
+                print(f"❌ Error loading FlameVision dataset: {e}")
+                dataset_counts["FlameVision"] = 0
         else:
-            print(f"FlameVision path not found, skipping...")
+            print(f"⚠️  FlameVision path not provided, skipping...")
+            dataset_counts["FlameVision"] = 0
 
-        print(f"\nTotal aggregated samples: {len(all_data)}")
-        self._print_dataset_stats(all_data)
+        print(f"\n" + "="*60)
+        print(f"AGGREGATION COMPLETE - Total samples: {len(all_data)}")
+        print("="*60)
+        
+        # Print individual dataset counts
+        for dataset, count in dataset_counts.items():
+            if count > 0:
+                print(f"  {dataset}: {count} samples")
+            else:
+                print(f"  {dataset}: Not loaded")
+        
+        if all_data:
+            self._print_dataset_stats(all_data)
+        else:
+            print("⚠️  No data was loaded from any dataset!")
         
         return all_data
 
