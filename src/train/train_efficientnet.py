@@ -10,7 +10,9 @@ import timm
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
 from dataloaders import create_dataloaders
-from ..data.dataset_configs import unified_config
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from src.data.dataset_configs import unified_config
 
 # EfficientNet Model
 class EfficientNetClassifier(nn.Module):

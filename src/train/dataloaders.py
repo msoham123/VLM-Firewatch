@@ -1,7 +1,10 @@
 import torch
 from torchvision import transforms
 from typing import List
-from ..data.torch_datasets import FireDataset, FireDatasetMultiQA, FireDatasetWithThermal
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from src.data.torch_datasets import FireDataset, FireDatasetMultiQA, FireDatasetWithThermal
 from torch.utils.data import DataLoader
 
 # Custom collate function for VQA tasks
