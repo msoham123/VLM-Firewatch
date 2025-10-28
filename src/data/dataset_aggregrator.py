@@ -66,7 +66,7 @@ class DatasetAggregator:
         Returns:
             Dictionary with aggregation plan details
         """
-        validation_results = self.validate_dataset_paths(flame_path, flame3_path, flamevision_path)
+        validation_results = self.validate_dataset_paths(flame_path, flame3_path, flamevision_path, places365_path)
         
         plan = {
             "total_datasets": len([p for p in [flame_path, flame3_path, flamevision_path] if p]),
@@ -90,7 +90,7 @@ class DatasetAggregator:
                 "Places365": {
                     "path": places365_path,
                     "available": validation_results["Places365"],
-                    "expected_samples": "5000 (5000 no-fire)"
+                    "expected_samples": "36500 (36500 no-fire)"
                 }
             }
         }
@@ -164,8 +164,7 @@ class DatasetAggregator:
             print(f"\n🔄 Loading Places365 dataset from: {places365_path}")
             try:
                 places365_data = self.loader.load_places365_dataset(
-                    places365_path, 
-                    outdoor_only=True
+                    places365_path
                 )
                 all_data.extend(places365_data)
                 dataset_counts["Places365"] = len(places365_data)

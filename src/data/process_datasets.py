@@ -25,7 +25,7 @@ def main():
     print(f"\n📋 AGGREGATION PLAN")
     print(f"Total datasets configured: {plan['total_datasets']}")
     print(f"Available datasets: {plan['available_datasets']}")
-    print(f"Expected total samples: ~{sum([738, 8600, 1500])} (FLAME3 + FlameVision + FLAME)")
+    print(f"Expected total samples: ~{sum([738, 8600, 1500, 36500])} (FLAME3 + FlameVision + FLAME + Places365)")
     
     print("\nDataset details:")
     for dataset_name, details in plan['datasets'].items():
@@ -43,7 +43,8 @@ def main():
     all_data = aggregrator.aggregate_datasets(
         flame_path=flame_config["src"],
         flame3_path=flame3_config["src"],
-        flamevision_path=flamevision_config["src"]
+        flamevision_path=flamevision_config["src"],
+        places365_path=places_365_config["src"]
     )
     
     if not all_data:

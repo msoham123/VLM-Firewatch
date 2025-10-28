@@ -46,15 +46,15 @@ class DatasetLoader:
             "No, no flames are visible in this scene."
         ]
 
-    def load_places365_dataset(self, places365_path: str, max_samples: int = 5000, 
-                            outdoor_only: bool = True) -> List[Dict]:
+    def load_places365_dataset(self, places365_path: str, max_samples: int = 36500, 
+                            outdoor_only: bool = False) -> List[Dict]:
         """
         Load Places365 validation dataset as NoFire samples
         Validation set: 36,500 images (50 per category, 365 categories)
         
         Args:
             places365_path: Root directory to store/load Places365
-            max_samples: Maximum number of samples to extract (default 5000)
+            max_samples: Maximum number of samples to extract (default 36500)
             outdoor_only: If True, only use outdoor scene categories
         """
         places365_data = []

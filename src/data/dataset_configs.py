@@ -27,7 +27,8 @@ flamevision_config = {
 }
 
 places_365_config = {
-    "src": "/home/hice1/smanoli3/scratch/datasets/places365"
+    "src": "/home/hice1/smanoli3/scratch/datasets/places365",
+    "processed": "/home/hice1/smanoli3/scratch/datasets/places365/processed_nofire_samples"
 }
 
 unified_config = {
