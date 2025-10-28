@@ -8,7 +8,8 @@ import json
 from tqdm import tqdm
 import timm
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix, classification_report
+from sklearn.utils.class_weight import compute_class_weight
 from dataloaders import create_dataloaders
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -25,8 +26,18 @@ class EfficientNetClassifier(nn.Module):
         return self.model(x)
 
 # Training Function
-def train_efficientnet(model, train_loader, val_loader, num_epochs=50, device='cuda'):
-    criterion = nn.CrossEntropyLoss()
+def train_efficientnet(model, train_loader, val_loader, num_epochs=10, device='cuda'):
+
+    train_labels = [1 if item['metadata']['has_fire'] else 0 for item in train_loader.dataset.data]
+    class_weights = compute_class_weight('balanced', classes=np.array([0, 1]), y=train_labels)
+    class_weights_tensor = torch.FloatTensor(class_weights).to(device)
+
+    print(f"\n📊 Class Weights Applied:")
+    print(f"  No Fire (class 0): {class_weights[0]:.4f}")
+    print(f"  Fire (class 1): {class_weights[1]:.4f}")
+    print(f"  Ratio: {class_weights[0]/class_weights[1]:.2f}:1 (No Fire is weighted {class_weights[0]/class_weights[1]:.1f}x more)\n")
+
+    criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.0001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
     
@@ -90,50 +101,75 @@ def train_efficientnet(model, train_loader, val_loader, num_epochs=50, device='c
         # Save best model
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), 'best_efficientnet_classifier.pth')
+            torch.save(model.state_dict(), 'models/best_efficientnet_classifier.pth')
             print(f'Model saved with validation accuracy: {val_acc:.4f}')
         
         scheduler.step()
     
     return history
 
-# Evaluation Function
 def evaluate_model(model, test_loader, device='cuda'):
     model.eval()
     all_preds, all_labels = [], []
-    all_probs = []
     
     with torch.no_grad():
         for images, labels in tqdm(test_loader, desc='Evaluating'):
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
-            probs = torch.softmax(outputs, dim=1)
             _, predicted = torch.max(outputs.data, 1)
             
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-            all_probs.extend(probs.cpu().numpy())
     
-    # Calculate metrics
+    # Detailed metrics
+    print(f'\n{"="*60}')
+    print("DETAILED EVALUATION RESULTS")
+    print("="*60)
+    
+    # Overall accuracy
     accuracy = accuracy_score(all_labels, all_preds)
-    precision, recall, f1, _ = precision_recall_fscore_support(
-        all_labels, all_preds, average='weighted'
-    )
-    cm = confusion_matrix(all_labels, all_preds)
+    print(f'\nOverall Accuracy: {accuracy:.4f}')
     
-    print(f'\nTest Results:')
-    print(f'Accuracy: {accuracy:.4f}')
-    print(f'Precision: {precision:.4f}')
-    print(f'Recall: {recall:.4f}')
-    print(f'F1-Score: {f1:.4f}')
-    print(f'\nConfusion Matrix:\n{cm}')
+    # Class-specific metrics
+    print(f'\nPer-Class Performance:')
+    print(classification_report(all_labels, all_preds, 
+                                target_names=['No Fire', 'Fire'],
+                                digits=4))
+    
+    # Confusion matrix
+    cm = confusion_matrix(all_labels, all_preds)
+    print(f'\nConfusion Matrix:')
+    print(f'                Predicted')
+    print(f'              No Fire  Fire')
+    print(f'Actual No Fire   {cm[0][0]:5d}   {cm[0][1]:5d}')
+    print(f'       Fire      {cm[1][0]:5d}   {cm[1][1]:5d}')
+    
+    # Calculate per-class accuracy
+    no_fire_acc = cm[0][0] / (cm[0][0] + cm[0][1]) if (cm[0][0] + cm[0][1]) > 0 else 0
+    fire_acc = cm[1][1] / (cm[1][0] + cm[1][1]) if (cm[1][0] + cm[1][1]) > 0 else 0
+    
+    print(f'\nPer-Class Accuracy:')
+    print(f'  No Fire: {no_fire_acc:.4f} ({cm[0][0]}/{cm[0][0] + cm[0][1]})')
+    print(f'  Fire:    {fire_acc:.4f} ({cm[1][1]}/{cm[1][0] + cm[1][1]})')
+    
+    # Check if model is just predicting fire for everything
+    fire_predictions = sum(all_preds)
+    total_predictions = len(all_preds)
+    print(f'\nPrediction Distribution:')
+    print(f'  Predicted Fire: {fire_predictions}/{total_predictions} ({fire_predictions/total_predictions*100:.1f}%)')
+    print(f'  Predicted No Fire: {total_predictions - fire_predictions}/{total_predictions} ({(total_predictions - fire_predictions)/total_predictions*100:.1f}%)')
+    
+    # Baseline comparison
+    actual_fire = sum(all_labels)
+    baseline_acc = max(actual_fire, total_predictions - actual_fire) / total_predictions
+    print(f'\nBaseline (always predict majority): {baseline_acc:.4f}')
+    print(f'Model improvement over baseline: {accuracy - baseline_acc:.4f} ({(accuracy - baseline_acc)/baseline_acc*100:.1f}%)')
     
     return {
         'accuracy': accuracy,
-        'precision': precision,
-        'recall': recall,
-        'f1': f1,
-        'confusion_matrix': cm
+        'confusion_matrix': cm,
+        'no_fire_accuracy': no_fire_acc,
+        'fire_accuracy': fire_acc
     }
 
 # Main execution for EfficientNet
@@ -141,7 +177,7 @@ if __name__ == '__main__':
     # Configuration
     DATA_PATH = 'path/to/your/preprocessed/dataset'
     BATCH_SIZE = 32
-    NUM_EPOCHS = 50
+    NUM_EPOCHS = 1
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     unified_path = unified_config["src"]
@@ -152,7 +188,7 @@ if __name__ == '__main__':
         val_json=f"{unified_path}/flame_vqa_val.json",
         test_json=f"{unified_path}/flame_vqa_test.json",
         batch_size=32,
-        num_workers=4,
+        num_workers=2,
         mode='classification',
         image_size=224
     )
@@ -168,11 +204,11 @@ if __name__ == '__main__':
     history = train_efficientnet(model, train_loader, val_loader, NUM_EPOCHS, DEVICE)
     
     # Load best model and evaluate
-    model.load_state_dict(torch.load('best_efficientnet_classifier.pth'))
+    model.load_state_dict(torch.load('models/best_efficientnet_classifier.pth'))
     results = evaluate_model(model, test_loader, DEVICE)
     
     # Save results
-    with open('efficientnet_results.json', 'w') as f:
+    with open('results/efficientnet_results.json', 'w') as f:
         json.dump({
             'history': history,
             'test_metrics': {k: v.tolist() if isinstance(v, np.ndarray) else v 

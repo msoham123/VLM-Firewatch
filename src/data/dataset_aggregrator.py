@@ -4,6 +4,8 @@ import random
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from dataset_loader import DatasetLoader
+from collections import defaultdict
+
 
 class DatasetAggregator:
     """
@@ -202,61 +204,141 @@ class DatasetAggregator:
         print("="*50)
 
     def create_train_val_test_split(self, data: List[Dict], 
-                                  train_ratio: float = 0.7, 
-                                  val_ratio: float = 0.15, 
-                                  test_ratio: float = 0.15) -> Tuple[List[Dict], List[Dict], List[Dict]]:
+                                train_ratio: float = 0.7, 
+                                val_ratio: float = 0.15, 
+                                test_ratio: float = 0.15) -> Tuple[List[Dict], List[Dict], List[Dict]]:
         """
-        Split the aggregated data into train, validation, and test sets
-        Maintains class balance across splits as specified in your project plan
-        
-        Args:
-            data: List of VQA dataset items
-            train_ratio: Proportion of data for training (default: 0.7)
-            val_ratio: Proportion of data for validation (default: 0.15)
-            test_ratio: Proportion of data for testing (default: 0.15)
-            
-        Returns:
-            Tuple of (train_data, val_data, test_data)
+        Split using First Fit Decreasing algorithm for better balance.
         """
-        # Separate fire and no-fire samples
-        fire_samples = [item for item in data if item["metadata"]["has_fire"]]
-        no_fire_samples = [item for item in data if not item["metadata"]["has_fire"]]
         
-        # Shuffle the samples
-        random.shuffle(fire_samples)
-        random.shuffle(no_fire_samples)
-        
-        def split_samples(samples, train_r, val_r, test_r):
-            n = len(samples)
-            train_end = int(n * train_r)
-            val_end = train_end + int(n * val_r)
+        def extract_video_id(item):
+            image_name = item['image']
+            path = item['metadata']['original_path']
             
-            return (samples[:train_end], 
-                   samples[train_end:val_end], 
-                   samples[val_end:])
+            if 'frame' in image_name.lower():
+                import re
+                match = re.search(r'frame(\d+)', image_name.lower())
+                if match:
+                    frame_num = int(match.group(1))
+                    parent_dir = str(Path(path).parent)
+                    # Group into sequences of 100 frames
+                    sequence_id = frame_num // 100
+                    video_id = f"{parent_dir}_seq{sequence_id}"
+                else:
+                    video_id = str(Path(path).parent)
+            else:
+                video_id = path
+            
+            return video_id
         
-        # Split fire samples
-        fire_train, fire_val, fire_test = split_samples(fire_samples, train_ratio, val_ratio, test_ratio)
+        # Group by video
+        video_groups = defaultdict(list)
+        for item in data:
+            video_id = extract_video_id(item)
+            video_groups[video_id].append(item)
         
-        # Split no-fire samples  
-        no_fire_train, no_fire_val, no_fire_test = split_samples(no_fire_samples, train_ratio, val_ratio, test_ratio)
+        # Separate fire and no-fire videos
+        fire_videos = []
+        no_fire_videos = []
         
-        # Combine and shuffle
-        train_data = fire_train + no_fire_train
-        val_data = fire_val + no_fire_val
-        test_data = fire_test + no_fire_test
+        for video_id, frames in video_groups.items():
+            fire_count = sum(1 for frame in frames if frame['metadata']['has_fire'])
+            video_info = {
+                'video_id': video_id,
+                'frames': frames,
+                'frame_count': len(frames),
+                'is_fire': fire_count > len(frames) / 2
+            }
+            
+            if video_info['is_fire']:
+                fire_videos.append(video_info)
+            else:
+                no_fire_videos.append(video_info)
+        
+        print(f"\nGrouping Analysis:")
+        print(f"  Total samples: {len(data)}")
+        print(f"  Unique videos: {len(video_groups)}")
+        print(f"  Fire videos: {len(fire_videos)}, No-fire videos: {len(no_fire_videos)}")
+        
+        # FIRST FIT DECREASING: Sort by size (largest first)
+        def split_by_first_fit_decreasing(videos, train_r, val_r, test_r):
+            """
+            Use First Fit Decreasing bin packing for balanced splits.
+            """
+            # Sort videos by frame count (descending)
+            sorted_videos = sorted(videos, key=lambda v: v['frame_count'], reverse=True)
+            
+            # Initialize bins
+            total_frames = sum(v['frame_count'] for v in videos)
+            target_train = total_frames * train_r
+            target_val = total_frames * val_r
+            target_test = total_frames * test_r
+            
+            train_videos = []
+            val_videos = []
+            test_videos = []
+            
+            train_size = 0
+            val_size = 0
+            test_size = 0
+            
+            # Assign each video to the bin that needs it most
+            for video in sorted_videos:
+                # Calculate how far each bin is from its target
+                train_deficit = target_train - train_size
+                val_deficit = target_val - val_size
+                test_deficit = target_test - test_size
+                
+                # Assign to bin with largest deficit
+                if train_deficit >= val_deficit and train_deficit >= test_deficit:
+                    train_videos.append(video)
+                    train_size += video['frame_count']
+                elif val_deficit >= test_deficit:
+                    val_videos.append(video)
+                    val_size += video['frame_count']
+                else:
+                    test_videos.append(video)
+                    test_size += video['frame_count']
+            
+            return train_videos, val_videos, test_videos
+        
+        # Split fire and no-fire separately (stratification)
+        fire_train, fire_val, fire_test = split_by_first_fit_decreasing(
+            fire_videos, train_ratio, val_ratio, test_ratio
+        )
+        no_fire_train, no_fire_val, no_fire_test = split_by_first_fit_decreasing(
+            no_fire_videos, train_ratio, val_ratio, test_ratio
+        )
+        
+        # Flatten to frames
+        def flatten_videos(video_list):
+            frames = []
+            for video in video_list:
+                frames.extend(video['frames'])
+            return frames
+        
+        train_data = flatten_videos(fire_train) + flatten_videos(no_fire_train)
+        val_data = flatten_videos(fire_val) + flatten_videos(no_fire_val)
+        test_data = flatten_videos(fire_test) + flatten_videos(no_fire_test)
         
         random.shuffle(train_data)
         random.shuffle(val_data)
         random.shuffle(test_data)
         
-        print(f"\nDataset splits created ({train_ratio*100:.0f}/{val_ratio*100:.0f}/{test_ratio*100:.0f} as per project plan):")
-        print(f"Train: {len(train_data)} samples")
-        print(f"Validation: {len(val_data)} samples")
-        print(f"Test: {len(test_data)} samples")
+        # Verification
+        total = len(train_data) + len(val_data) + len(test_data)
+        print(f"\n✅ Split Results:")
+        print(f"  Train: {len(train_data)} ({len(train_data)/total*100:.1f}%) - Target: {train_ratio*100:.1f}%")
+        print(f"  Val: {len(val_data)} ({len(val_data)/total*100:.1f}%) - Target: {val_ratio*100:.1f}%")
+        print(f"  Test: {len(test_data)} ({len(test_data)/total*100:.1f}%) - Target: {test_ratio*100:.1f}%")
+        
+        # Class distribution
+        for name, split_data in [("Train", train_data), ("Val", val_data), ("Test", test_data)]:
+            fire_count = sum(1 for item in split_data if item['metadata']['has_fire'])
+            print(f"  {name} fire ratio: {fire_count/len(split_data)*100:.1f}%")
         
         return train_data, val_data, test_data
-    
+
     def get_dataset_summary(self, data: List[Dict]) -> Dict:
         """
         Get a summary dictionary of dataset statistics
