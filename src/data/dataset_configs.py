@@ -15,15 +15,15 @@
 # }
 
 flame_config = {
-    "src": "/home/hice1/mchidambaram7/scratch/datasets/downloads/Training",
+    "src": "/home/hice1/smanoli3/scratch/datasets/FLAME/Training",
 }
 
 flame3_config = {
-    "src": "/home/hice1/mchidambaram7/scratch/datasets/FLAME 3 CV Dataset (Sycan Marsh)",
+    "src": "/home/hice1/smanoli3/scratch/datasets/flame3/FLAME 3 CV Dataset (Sycan Marsh)",
 }
 
 flamevision_config = {
-    "src": "/home/hice1/mchidambaram7/scratch/datasets/Classification",
+    "src": "/home/hice1/smanoli3/scratch/datasets/flamevision/Classification",
 }
 
 places_365_config = {
