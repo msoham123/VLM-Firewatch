@@ -8,6 +8,9 @@ from pathlib import Path
 import random
 from typing import Dict, List, Tuple, Optional
 from tqdm import tqdm
+from torchvision.datasets import Places365
+from PIL import Image
+
 
 class DatasetLoader:
     """
@@ -42,6 +45,115 @@ class DatasetLoader:
             "No, there is no wildfire present.",
             "No, no flames are visible in this scene."
         ]
+
+    def load_places365_dataset(self, places365_path: str, max_samples: int = 5000, 
+                            outdoor_only: bool = True) -> List[Dict]:
+        """
+        Load Places365 validation dataset as NoFire samples
+        Validation set: 36,500 images (50 per category, 365 categories)
+        
+        Args:
+            places365_path: Root directory to store/load Places365
+            max_samples: Maximum number of samples to extract (default 5000)
+            outdoor_only: If True, only use outdoor scene categories
+        """
+        places365_data = []
+        places365_path = Path(places365_path)
+        
+        print(f"\n🔄 Loading Places365 validation dataset...")
+        
+        # Define outdoor/nature categories (indices) to use as NoFire samples
+        # These are more relevant for fire detection context
+        outdoor_categories = [
+            'beach', 'forest_path', 'mountain', 'valley', 'coast', 'lake_natural',
+            'park', 'playground', 'soccer_field', 'baseball_field', 'golf_course',
+            'street', 'highway', 'bridge', 'parking_lot', 'gas_station',
+            'field_road', 'river', 'waterfall', 'canyon', 'sky',
+            'pasture', 'desert_sand', 'desert_vegetation', 'cliff',
+            'campsite', 'forest_road', 'picnic_area', 'pond',
+            'rainforest', 'rock_arch', 'sandbar', 'ski_slope', 'snowfield',
+            'swamp', 'tree_farm', 'vegetation', 'volcanic_crater', 'wave'
+        ]
+        
+        try:
+            # Download Places365 validation set (small version - 256x256 images)
+            print("  Downloading Places365 validation set (this may take a few minutes)...")
+            dataset = Places365(
+                root=str(places365_path),
+                split='val',  # 36,500 images
+                # small=True,   # 256x256 resolution (faster download)
+                download=True
+            )
+            
+            print(f"  ✅ Downloaded {len(dataset)} images")
+            print(f"  Available categories: {len(dataset.classes)}")
+            
+            # Get category name to index mapping
+            class_to_idx = {cls.split('/')[-1]: idx for idx, cls in enumerate(dataset.classes)}
+            
+            if outdoor_only:
+                # Filter for outdoor categories
+                outdoor_indices = set()
+                for cat in outdoor_categories:
+                    if cat in class_to_idx:
+                        outdoor_indices.add(class_to_idx[cat])
+                
+                print(f"  Filtering for {len(outdoor_indices)} outdoor categories...")
+            
+            # Create output directory for processed images
+            output_dir = places365_path / "processed_nofire_samples"
+            output_dir.mkdir(exist_ok=True)
+            
+            # Extract samples
+            sample_count = 0
+            print("  Processing images...")
+            
+            for idx in tqdm(range(len(dataset)), desc="  Extracting samples"):
+                if sample_count >= max_samples:
+                    break
+                    
+                image, label = dataset[idx]
+                
+                # Skip if outdoor_only and not in outdoor categories
+                if outdoor_only and label not in outdoor_indices:
+                    continue
+                
+                # Save image to output directory
+                image_filename = f"places365_val_{idx:06d}.jpg"
+                image_path = output_dir / image_filename
+                
+                # Save image
+                if isinstance(image, Image.Image):
+                    image.save(image_path)
+                else:
+                    # Convert tensor to PIL if needed
+                    from torchvision.transforms import ToPILImage
+                    to_pil = ToPILImage()
+                    to_pil(image).save(image_path)
+                
+                # Create VQA item
+                vqa_item = self._create_vqa_item(
+                    image_path=str(image_path),
+                    has_fire=False,  # All Places365 are NoFire samples
+                    source_dataset="Places365",
+                    thermal_available=False,
+                    split="validation"
+                )
+                
+                # Add scene category metadata
+                vqa_item["metadata"]["scene_category"] = dataset.classes[label]
+                
+                places365_data.append(vqa_item)
+                sample_count += 1
+            
+            print(f"  ✅ Successfully loaded {len(places365_data)} NoFire samples from Places365")
+            
+        except Exception as e:
+            print(f"  ❌ Error loading Places365 dataset: {e}")
+            print(f"  Note: Places365 download requires ~2-3GB for validation set")
+            return []
+        
+        return places365_data
 
     def load_flame3_dataset(self, flame3_path: str) -> List[Dict]:
         """

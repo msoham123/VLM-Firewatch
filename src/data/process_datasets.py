@@ -1,5 +1,5 @@
 from dataset_loader import DatasetLoader
-from dataset_configs import flame_config, flame3_config, flamevision_config, unified_config
+from dataset_configs import flame_config, flame3_config, flamevision_config, unified_config, places_365_config
 from dataset_aggregrator import DatasetAggregator
 import json
 from pathlib import Path
@@ -18,7 +18,8 @@ def main():
     plan = aggregrator.get_aggregation_plan(
         flame_path=flame_config["src"],
         flame3_path=flame3_config["src"],
-        flamevision_path=flamevision_config["src"]
+        flamevision_path=flamevision_config["src"],
+        places365_path=places_365_config["src"]
     )
     
     print(f"\n📋 AGGREGATION PLAN")

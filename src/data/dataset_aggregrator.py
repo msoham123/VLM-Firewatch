@@ -17,7 +17,7 @@ class DatasetAggregator:
         self.loader = loader
 
     def validate_dataset_paths(self, flame_path: str = None, flame3_path: str = None, 
-                              flamevision_path: str = None) -> Dict[str, bool]:
+                              flamevision_path: str = None,  places365_path: str = None) -> Dict[str, bool]:
         """
         Validate that dataset paths exist and are accessible
         
@@ -45,11 +45,16 @@ class DatasetAggregator:
             validation_results["FlameVision"] = Path(flamevision_path).exists()
         else:
             validation_results["FlameVision"] = False
-            
+
+        if places365_path:
+            validation_results["Places365"] = Path(places365_path).exists()
+        else:
+            validation_results["Places365"] = False
+             
         return validation_results
 
     def get_aggregation_plan(self, flame_path: str = None, flame3_path: str = None, 
-                           flamevision_path: str = None) -> Dict:
+                           flamevision_path: str = None, places365_path: str = None) -> Dict:
         """
         Get a plan of what datasets will be aggregated
         
@@ -81,6 +86,11 @@ class DatasetAggregator:
                     "path": flamevision_path,
                     "available": validation_results["FlameVision"],
                     "expected_samples": "8600 (5000 fire + 3600 no-fire)"
+                },
+                "Places365": {
+                    "path": places365_path,
+                    "available": validation_results["Places365"],
+                    "expected_samples": "5000 (5000 no-fire)"
                 }
             }
         }
@@ -88,7 +98,7 @@ class DatasetAggregator:
         return plan
 
     def aggregate_datasets(self, flame_path: str = None, flame3_path: str = None, 
-                          flamevision_path: str = None) -> List[Dict]:
+                          flamevision_path: str = None, places365_path: str = None) -> List[Dict]:
         """
         Aggregate all FLAME datasets into unified VQA format
         
@@ -149,6 +159,23 @@ class DatasetAggregator:
         else:
             print(f"⚠️  FlameVision path not provided, skipping...")
             dataset_counts["FlameVision"] = 0
+
+        if places365_path:
+            print(f"\n🔄 Loading Places365 dataset from: {places365_path}")
+            try:
+                places365_data = self.loader.load_places365_dataset(
+                    places365_path, 
+                    outdoor_only=True
+                )
+                all_data.extend(places365_data)
+                dataset_counts["Places365"] = len(places365_data)
+                print(f"✅ Successfully loaded {len(places365_data)} NoFire samples from Places365")
+            except Exception as e:
+                print(f"❌ Error loading Places365 dataset: {e}")
+                dataset_counts["Places365"] = 0
+        else:
+            print(f"⚠️  Places365 path not provided, skipping...")
+            dataset_counts["Places365"] = 0
 
         print(f"\n" + "="*60)
         print(f"AGGREGATION COMPLETE - Total samples: {len(all_data)}")
