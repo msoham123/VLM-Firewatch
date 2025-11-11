@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+python -m pip install --pre -U -f https://mlc.ai/wheels mlc-llm-nightly-cpu mlc-ai-nightly-cpu
+
 rm -rf ~/.cache/torch_extensions/
 
 echo "=== MoonDream2 INT4 Quantization (CPU Mode) ==="
