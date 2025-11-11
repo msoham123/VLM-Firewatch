@@ -61,11 +61,14 @@ python src/data/process_datasets.py
 
 All of our training code can be found in `src/train/`. This directory includes configurations for fine-tuning, training (aka fine-tuning) scripts, and dataloaders to help load the unified dataset. The results from finetuning the baseline models will be stored in  `src/train/results` while the model weights themselves will be saved in `src/train/models`. We will discuss how the VLM is saved in that section later.
 
+To train/fine-tune the classifier models, run the below:
+
+```python
+python train_efficientnet.py
+
+python train_yolo.py
+```
+
 ## 3 - Quantize the Fine-Tuned VLM
 
-python -m pip install --pre -U -f https://mlc.ai/wheels mlc-llm-nightly-cu128 mlc-ai-nightly-cu128
-
-pip install https://github.com/mlc-ai/package/releases/download/v0.9.dev0/mlc_llm_nightly_cu124-0.20.dev93-py3-none-manylinux_2_28_x86_64.whl
-pip install https://github.com/mlc-ai/package/releases/download/v0.9.dev0/mlc_ai_nightly_cu124-0.20.dev537-py3-none-manylinux_2_28_x86_64.whl
-
-python -m pip install --pre -U -f https://mlc.ai/wheels mlc-llm-nightly-cpu mlc-ai-nightly-cpu
+TODO for last checkpoint.

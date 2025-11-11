@@ -20,3 +20,9 @@ dependencies:
     - scikit-learn
     - ultralytics
     - numpy
+    - scikit-learn
+    - matplotlib
+    - seaborn
+    - onnx
+    - tensorrt-cu12
+    - pycuda
