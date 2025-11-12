@@ -124,14 +124,82 @@ If you enable wandb logging, you can monitor training progress in the web interf
 - **Recommended**: 16GB+ GPU memory
 - **With 4-bit quantization**: Can work with 8GB
 
+## Fine-tuning from Last Checkpoint
+
+If training was interrupted or you want to continue training from a saved checkpoint:
+
+### Option 1: Resume from Best Model
+
+To continue training from the best saved checkpoint:
+
+```bash
+cd /home/hice1/mchidambaram7/scratch/VLM-FireWatch/src/train
+
+python finetune_moondream2.py \
+    --train_json /home/hice1/mchidambaram7/scratch/datasets/unified_dataset/flame_vqa_train.json \
+    --val_json /home/hice1/mchidambaram7/scratch/datasets/unified_dataset/flame_vqa_val.json \
+    --batch_size 8 \
+    --epochs 3 \
+    --learning_rate 1e-5 \
+    --output_path /home/hice1/mchidambaram7/scratch/VLM-FireWatch/models
+```
+
+**Note:** The current `finetune_moondream2.py` script starts from the base model. To resume from a checkpoint, you would need to modify the script to load the checkpoint first:
+
+```python
+# In finetune_moondream2.py, modify the model loading section:
+checkpoint_path = "/home/hice1/mchidambaram7/scratch/VLM-FireWatch/models/moondream2_fire_detection_best"
+model = AutoModelForCausalLM.from_pretrained(
+    checkpoint_path,  # Use checkpoint instead of base model
+    torch_dtype=torch.float16,
+    trust_remote_code=True,
+    device_map="auto"
+)
+```
+
+### Option 2: Continue Training with Additional Epochs
+
+If you want to add more epochs to an already trained model:
+
+1. Load the fine-tuned model from `models/moondream2_fire_detection_best/`
+2. Continue training with the same or adjusted hyperparameters
+3. The script will save a new best model if validation loss improves
+
+### Running Fine-tuning in Background
+
+For long training runs on a remote server:
+
+```bash
+cd /home/hice1/mchidambaram7/scratch/VLM-FireWatch/src/train
+
+nohup python finetune_moondream2.py \
+    --train_json /home/hice1/mchidambaram7/scratch/datasets/unified_dataset/flame_vqa_train.json \
+    --val_json /home/hice1/mchidambaram7/scratch/datasets/unified_dataset/flame_vqa_val.json \
+    --batch_size 8 \
+    --epochs 3 \
+    --learning_rate 1e-5 \
+    > finetuning.log 2>&1 &
+```
+
+Monitor progress:
+```bash
+tail -f finetuning.log
+```
+
+Check if training is running:
+```bash
+ps aux | grep finetune_moondream2
+```
+
 ## Next Steps
 
 After training completes:
 
 1. **Evaluate the model** on the test set
-2. **Create inference script** for real-time fire detection
-3. **Deploy the model** for production use
-4. **Fine-tune further** if needed based on performance
+2. **Run object detection evaluation** (see `src/train/evaluate_object_detection.py`)
+3. **Create inference script** for real-time fire detection
+4. **Deploy the model** for production use
+5. **Fine-tune further** if needed based on performance
 
 ## Support
 
