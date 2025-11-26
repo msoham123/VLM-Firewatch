@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
 """
 Inference script for fine-tuned Moondream 2 model
+Uses existing dataloaders for efficient batch processing
 """
 
 import os
@@ -8,7 +8,7 @@ import json
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict
 import torch
 from PIL import Image
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -18,9 +18,15 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from src.data.dataset_configs import unified_config, moondream_config
+from src.train.dataloaders import create_dataloaders
+
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class FinetunedMoondream2Inference:
     def __init__(self, model_path: str, device: str = "cuda"):
@@ -35,23 +41,61 @@ class FinetunedMoondream2Inference:
         try:
             logger.info(f"Loading fine-tuned model from: {self.model_path}")
             
-            # Load tokenizer
+            # Step 1: Load base model architecture from HuggingFace
+            logger.info("Loading base Moondream2 architecture...")
+            base_model_name = "vikhyatk/moondream2"
+            md_revision = "2024-07-23"
+            
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_path, 
+                base_model_name,
+                revision=md_revision,
                 trust_remote_code=True
             )
             if self.tokenizer.pad_token is None:
-                self.tokenizer.pad_token = self.tokenizer.eos_token
+                self.tokenizer.pad_token = "<|pad|>"  # Use unique pad token
+                self.tokenizer.add_special_tokens({'pad_token': '<|pad|>'})
             
-            # Load model
             self.model = AutoModelForCausalLM.from_pretrained(
-                self.model_path,
+                base_model_name,
+                revision=md_revision,
                 trust_remote_code=True,
-                torch_dtype=torch.float16,
-                device_map={"": self.device}
-            ).to(self.device)
+                torch_dtype=torch.float16
+            )
             
-            logger.info("Fine-tuned model loaded successfully!")
+            # Step 2: Load fine-tuned weights
+            logger.info("Loading fine-tuned weights...")
+            finetuned_weights_path = os.path.join(self.model_path, "pytorch_model.bin")
+            
+            if os.path.exists(finetuned_weights_path):
+                state_dict = torch.load(finetuned_weights_path, map_location='cpu')
+                self.model.load_state_dict(state_dict, strict=False)
+                logger.info("Fine-tuned weights loaded successfully!")
+            else:
+                # Try alternative weight file names
+                alt_paths = [
+                    os.path.join(self.model_path, "model.safetensors"),
+                    os.path.join(self.model_path, "pytorch_model.safetensors"),
+                ]
+                
+                loaded = False
+                for alt_path in alt_paths:
+                    if os.path.exists(alt_path):
+                        from safetensors.torch import load_file
+                        state_dict = load_file(alt_path)
+                        self.model.load_state_dict(state_dict, strict=False)
+                        logger.info(f"Fine-tuned weights loaded from {alt_path}!")
+                        loaded = True
+                        break
+                
+                if not loaded:
+                    logger.warning("No fine-tuned weights found! Using base model.")
+                    logger.warning(f"Looked in: {self.model_path}")
+            
+            # Step 3: Move to device
+            self.model = self.model.to(self.device)
+            self.model.eval()
+            
+            logger.info("Model loaded and ready for inference!")
             
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
@@ -61,50 +105,70 @@ class FinetunedMoondream2Inference:
         """Answer a question about an image using the fine-tuned model"""
         try:
             with torch.no_grad():
-                answer = self.model.answer_question(image, question, self.tokenizer)
+                enc_image = self.model.encode_image(image)
+                answer = self.model.answer_question(enc_image, question, self.tokenizer)
             return answer
         except Exception as e:
             logger.error(f"Error answering question: {e}")
             return "Error"
     
-    def run_inference_on_dataset(self, test_json: str, output_file: str = None) -> Dict:
-        """Run inference on entire test dataset"""
-        logger.info(f"Loading test dataset from: {test_json}")
+    def run_inference_batch(self, batch):
+        """Run inference on a batch from the dataloader"""
+        pil_images = []
         
-        with open(test_json, 'r') as f:
-            test_data = json.load(f)
+        # Load PIL images from paths (Moondream needs PIL images, not tensors)
+        for img_name in batch['image_names']:
+            metadata = batch['metadata'][batch['image_names'].index(img_name)]
+            img_path = metadata.get('original_path', img_name)
+            
+            try:
+                pil_img = Image.open(img_path).convert('RGB')
+                pil_images.append(pil_img)
+            except Exception as e:
+                logger.error(f"Error loading image {img_path}: {e}")
+                pil_images.append(None)
         
-        logger.info(f"Running inference on {len(test_data)} samples...")
+        # Run inference on each image in the batch
+        predictions = []
+        for pil_img, question in zip(pil_images, batch['questions']):
+            if pil_img is not None:
+                prediction = self.answer_question(pil_img, question)
+                predictions.append(prediction)
+            else:
+                predictions.append("Error")
+        
+        return predictions
+    
+    def run_inference_on_dataloader(self, test_loader, output_file: str = None) -> Dict:
+        """Run inference using dataloader"""
+        logger.info(f"Running inference on {len(test_loader.dataset)} samples...")
         
         results = []
         predictions = []
         ground_truths = []
         
-        for i, sample in enumerate(tqdm(test_data, desc="Running inference")):
-            try:
-                # Load image
-                image_path = sample['metadata']['original_path']
-                if not os.path.exists(image_path):
-                    logger.warning(f"Image not found: {image_path}")
-                    continue
+        # Progress bar for batches
+        pbar = tqdm(test_loader, desc="Running inference", total=len(test_loader))
+        
+        correct_count = 0
+        total_count = 0
+        
+        for batch in pbar:
+            # Run inference on batch
+            batch_predictions = self.run_inference_batch(batch)
+            
+            # Process batch results
+            for i, prediction in enumerate(batch_predictions):
+                ground_truth = batch['answers'][i]
+                metadata = batch['metadata'][i]
                 
-                image = Image.open(image_path).convert('RGB')
-                image = image.resize((224, 224))
-                
-                # Get question and ground truth
-                question = sample['conversations'][0]['question']
-                ground_truth = sample['conversations'][0]['answer']
-                
-                # Run inference
-                prediction = self.answer_question(image, question)
-                
-                # Store results
+                # Store result
                 result = {
-                    'image_name': sample['image'],
-                    'question': question,
+                    'image_name': batch['image_names'][i],
+                    'question': batch['questions'][i],
                     'ground_truth': ground_truth,
                     'prediction': prediction,
-                    'has_fire': sample['metadata']['has_fire'],
+                    'has_fire': metadata['has_fire'],
                     'correct': self._is_correct(ground_truth, prediction)
                 }
                 results.append(result)
@@ -113,9 +177,19 @@ class FinetunedMoondream2Inference:
                 predictions.append(self._normalize_answer(prediction))
                 ground_truths.append(self._normalize_answer(ground_truth))
                 
-            except Exception as e:
-                logger.error(f"Error processing sample {i}: {e}")
-                continue
+                # Update counters
+                if result['correct']:
+                    correct_count += 1
+                total_count += 1
+            
+            # Update progress bar with running accuracy
+            current_acc = correct_count / total_count * 100 if total_count > 0 else 0
+            pbar.set_postfix({
+                'Accuracy': f'{current_acc:.1f}%',
+                'Correct': f'{correct_count}/{total_count}'
+            })
+        
+        pbar.close()
         
         # Calculate metrics
         metrics = self._calculate_metrics(ground_truths, predictions, results)
@@ -159,7 +233,7 @@ class FinetunedMoondream2Inference:
         no_fire_accuracy = sum(r['correct'] for r in no_fire_results) / len(no_fire_results) if no_fire_results else 0
         
         # Classification report
-        report = classification_report(ground_truths, predictions, output_dict=True)
+        report = classification_report(ground_truths, predictions, output_dict=True, zero_division=0)
         
         # Confusion matrix
         cm = confusion_matrix(ground_truths, predictions, labels=['yes', 'no'])
@@ -176,6 +250,9 @@ class FinetunedMoondream2Inference:
     
     def _save_results(self, results: List[Dict], metrics: Dict, output_file: str):
         """Save inference results and metrics"""
+        # Create output directory if it doesn't exist
+        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+        
         output_data = {
             'metrics': metrics,
             'results': results
@@ -192,8 +269,8 @@ class FinetunedMoondream2Inference:
         
         plt.figure(figsize=(8, 6))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
-                   xticklabels=['No Fire', 'Fire'], 
-                   yticklabels=['No Fire', 'Fire'])
+                   xticklabels=['Yes', 'No'], 
+                   yticklabels=['Yes', 'No'])
         plt.title('Confusion Matrix - Fine-tuned Moondream 2')
         plt.ylabel('True Label')
         plt.xlabel('Predicted Label')
@@ -201,21 +278,34 @@ class FinetunedMoondream2Inference:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
             logger.info(f"Confusion matrix saved to: {save_path}")
-        
-        plt.show()
+        else:
+            plt.show()
+
 
 def main():
+    # Dataset paths
+    unified_path = unified_config["src"]
+    train_json = f"{unified_path}/flame_vqa_train.json"
+    val_json = f"{unified_path}/flame_vqa_val.json"
+    test_json = f"{unified_path}/flame_vqa_test.json"
+    
+    tuned_moondream_path = moondream_config["fine_tuned"]
+    
     parser = argparse.ArgumentParser(description="Run inference with fine-tuned Moondream 2")
-    parser.add_argument("--model_path", type=str, required=True, 
+    parser.add_argument("--model_path", type=str, default=tuned_moondream_path, 
                        help="Path to fine-tuned model directory")
     parser.add_argument("--test_json", type=str, 
-                       default="/home/hice1/mchidambaram7/scratch/datasets/unified_dataset/flame_vqa_test.json",
+                       default=test_json,
                        help="Path to test JSON file")
     parser.add_argument("--output_file", type=str, 
-                       default="inference_results_finetuned.json",
+                       default="src/train/results/inference_results_finetuned.json",
                        help="Output file for results")
     parser.add_argument("--device", type=str, default="cuda",
                        help="Device to use (cuda/cpu)")
+    parser.add_argument("--batch_size", type=int, default=1,
+                       help="Batch size for inference")
+    parser.add_argument("--num_workers", type=int, default=2,
+                       help="Number of dataloader workers")
     parser.add_argument("--plot_cm", action="store_true",
                        help="Plot confusion matrix")
     
@@ -229,23 +319,42 @@ def main():
     # Initialize inference
     inference = FinetunedMoondream2Inference(args.model_path, args.device)
     
+    # Create dataloader
+    logger.info("Creating dataloaders...")
+    _, _, test_loader = create_dataloaders(
+        train_json=train_json,
+        val_json=val_json,
+        test_json=args.test_json,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        mode='vqa',
+        image_size=378,
+        pin_memory=True
+    )
+    
     # Run inference
-    results = inference.run_inference_on_dataset(args.test_json, args.output_file)
+    print("\n" + "="*80)
+    print("FINE-TUNED MOONDREAM 2 INFERENCE")
+    print("="*80)
+    
+    results = inference.run_inference_on_dataloader(test_loader, args.output_file)
     
     # Print results
     metrics = results['metrics']
-    logger.info("\n" + "="*50)
-    logger.info("INFERENCE RESULTS")
-    logger.info("="*50)
-    logger.info(f"Total samples: {results['total_samples']}")
-    logger.info(f"Overall accuracy: {metrics['overall_accuracy']:.4f}")
-    logger.info(f"Fire accuracy: {metrics['fire_accuracy']:.4f} ({metrics['fire_samples']} samples)")
-    logger.info(f"No-fire accuracy: {metrics['no_fire_accuracy']:.4f} ({metrics['no_fire_samples']} samples)")
+    print(f"\n🎯 COMPREHENSIVE EVALUATION RESULTS:")
+    print(f"="*60)
+    print(f"Total samples: {results['total_samples']}")
+    print(f"Overall accuracy: {metrics['overall_accuracy']:.4f} ({metrics['overall_accuracy']*100:.1f}%)")
+    print(f"")
+    print(f"Fire accuracy: {metrics['fire_accuracy']:.4f} ({metrics['fire_accuracy']*100:.1f}%) - {metrics['fire_samples']} samples")
+    print(f"No-fire accuracy: {metrics['no_fire_accuracy']:.4f} ({metrics['no_fire_accuracy']*100:.1f}%) - {metrics['no_fire_samples']} samples")
+    print(f"="*60)
     
     # Plot confusion matrix if requested
     if args.plot_cm:
         cm_path = args.output_file.replace('.json', '_confusion_matrix.png')
         inference.plot_confusion_matrix(metrics, cm_path)
+
 
 if __name__ == "__main__":
     main()

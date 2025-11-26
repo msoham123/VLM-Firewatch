@@ -90,19 +90,22 @@ def create_dataloaders(
     train_dataset = FireDataset(
         json_path=train_json,
         transform=train_transform,
-        mode=mode
+        mode=mode,
+        return_metadata=True 
     )
     
     val_dataset = FireDataset(
         json_path=val_json,
         transform=val_transform,
-        mode=mode
+        mode=mode,
+        return_metadata=True 
     )
     
     test_dataset = FireDataset(
         json_path=test_json,
         transform=val_transform,
-        mode=mode
+        mode=mode,
+        return_metadata=True 
     )
     
     # Create dataloaders

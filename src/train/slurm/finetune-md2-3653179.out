@@ -1,0 +1,45 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-25-2025 16:53:59
+Job ID:    3653179
+User ID:   smanoli3
+Account:   coc
+Job name:  finetune_md2
+Partition: coe-gpu
+QOS:       coe-ice
+---------------------------------------
+The cache for model files in Transformers v4.22.0 has been updated. Migrating your old cache. This is a one-time only operation. You can interrupt this and resume the migration later on by calling `transformers.utils.move_cache()`.
+0it [00:00, ?it/s]0it [00:00, ?it/s]
+INFO:__main__:Using device: cuda, dtype: torch.float16
+INFO:__main__:Loading model: vikhyatk/moondream2
+You are attempting to use Flash Attention 2.0 without specifying a torch dtype. This might lead to unexpected behaviour
+You are attempting to use Flash Attention 2.0 with a model not initialized on GPU. Make sure to move the model to GPU after initializing it on CPU with `model.to('cuda')`.
+Traceback (most recent call last):
+  File "/home/hice1/smanoli3/VLM-FireWatch/src/train/finetune_moondream2.py", line 571, in <module>
+    main()
+  File "/home/hice1/smanoli3/VLM-FireWatch/src/train/finetune_moondream2.py", line 508, in main
+    fine_tuner = Moondream2FineTuner(device=device, dtype=dtype)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hice1/smanoli3/VLM-FireWatch/src/train/finetune_moondream2.py", line 199, in __init__
+    self._load_model_and_tokenizer()
+  File "/home/hice1/smanoli3/VLM-FireWatch/src/train/finetune_moondream2.py", line 216, in _load_model_and_tokenizer
+    self.model = AutoModelForCausalLM.from_pretrained(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hice1/smanoli3/scratch/conda/conda_envs/vlm_firewatch_env/lib/python3.11/site-packages/transformers/models/auto/auto_factory.py", line 559, in from_pretrained
+    return model_class.from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hice1/smanoli3/scratch/conda/conda_envs/vlm_firewatch_env/lib/python3.11/site-packages/transformers/modeling_utils.py", line 4130, in from_pretrained
+    model = cls(config, *model_args, **model_kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Moondream.__init__() got an unexpected keyword argument 'dtype'
+---------------------------------------
+Begin Slurm Epilog: Nov-25-2025 16:56:50
+Job ID:        3653179
+User ID:       smanoli3
+Account:       coc
+Job name:      finetune_md2
+Resources:     cpu=2,gres/gpu:h100=1,mem=128G,node=1
+Rsrc Used:     cput=00:05:42,vmem=0,walltime=00:02:51,mem=2000380K,energy_used=0
+Partition:     coe-gpu
+QOS:           coe-ice
+Nodes:         atl1-1-03-013-13-0
+---------------------------------------
