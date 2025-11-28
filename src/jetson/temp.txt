@@ -1,0 +1,57 @@
+
+======================================================================
+BENCHMARKING FINE-TUNED MODEL
+======================================================================
+
+Loading fine-tuned model from /home/hparch/smanoli3/finetuned_moondream...
+PhiForCausalLM has generative capabilities, as `prepare_inputs_for_generation` is explicitly overwritten. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+Traceback (most recent call last):
+  File "/home/hparch/smanoli3/VLM-Firewatch/src/jetson/measure_power_lat.py", line 415, in <module>
+    main()
+  File "/home/hparch/smanoli3/VLM-Firewatch/src/jetson/measure_power_lat.py", line 357, in main
+    benchmark = FinetunedMoondream2Benchmark(args.finetuned_path)
+  File "/home/hparch/smanoli3/VLM-Firewatch/src/jetson/measure_power_lat.py", line 182, in __init__
+    self.load_model()
+  File "/home/hparch/smanoli3/VLM-Firewatch/src/jetson/measure_power_lat.py", line 215, in load_model
+    self.model = self.model.to(self.device)
+  File "/home/hparch/miniconda3/envs/jetson-env/lib/python3.10/site-packages/transformers/modeling_utils.py", line 3164, in to
+    return super().to(*args, **kwargs)
+  File "/home/hparch/miniconda3/envs/jetson-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1173, in to
+    return self._apply(convert)
+  File "/home/hparch/miniconda3/envs/jetson-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 779, in _apply
+    module._apply(fn)
+  File "/home/hparch/miniconda3/envs/jetson-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 779, in _apply
+    module._apply(fn)
+  File "/home/hparch/miniconda3/envs/jetson-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 779, in _apply
+    module._apply(fn)
+  [Previous line repeated 3 more times]
+  File "/home/hparch/miniconda3/envs/jetson-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 804, in _apply
+    param_applied = fn(param)
+  File "/home/hparch/miniconda3/envs/jetson-env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1159, in convert
+    return t.to(
+RuntimeError: NVML_SUCCESS == r INTERNAL ASSERT FAILED at "/opt/pytorch/c10/cuda/CUDACachingAllocator.cpp":844, please report a bug to PyTorch. 

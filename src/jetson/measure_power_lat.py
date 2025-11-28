@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 import threading
 import re
+import gc
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from src.data.dataset_configs import moondream_config
@@ -209,6 +210,8 @@ class FinetunedMoondream2Benchmark(ModelBenchmark):
             state_dict = load_file(finetuned_weights)
             self.model.load_state_dict(state_dict, strict=False)
         
+        torch.cuda.empty_cache()
+        gc.collect()
         self.model = self.model.to(self.device)
         self.model.eval()
         
@@ -325,10 +328,10 @@ def print_results(results: Dict, model_name: str):
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Moondream2 models on Jetson")
     parser.add_argument("--finetuned_path", type=str, 
-                       default="",
+                       default="/home/hparch/smanoli3/finetuned_moondream",
                        help="Path to fine-tuned model directory")
     parser.add_argument("--trt_engine", type=str,
-                       default="",
+                       default="/home/hparch/smanoli3/moondream2_tuned_int8.engine",
                        help="Path to TensorRT engine file")
     parser.add_argument("--runs", type=int, default=5000,
                        help="Number of benchmark runs")
