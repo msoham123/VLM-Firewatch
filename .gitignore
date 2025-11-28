@@ -143,15 +143,6 @@ dmypy.json
 *.feather
 *.arrow
 
-# Image files (unless specifically needed)
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.bmp
-*.tiff
-*.webp
-
 # Video files
 *.mp4
 *.avi
