@@ -172,18 +172,74 @@ class ModelBenchmark:
         raise NotImplementedError
 
 
-class FinetunedMoondream2Benchmark(ModelBenchmark):
-    """Benchmark fine-tuned PyTorch model"""
+# class FinetunedMoondream2Benchmark(ModelBenchmark):
+#     """Benchmark fine-tuned PyTorch model"""
     
-    def __init__(self, model_path: str, device: str = "cuda"):
-        super().__init__("Fine-tuned Moondream2")
+#     def __init__(self, model_path: str, device: str = "cuda"):
+#         super().__init__("Fine-tuned Moondream2")
+#         self.model_path = model_path
+#         self.device = torch.device(device)
+#         self.load_model()
+    
+#     def load_model(self):
+#         """Load fine-tuned model"""
+#         print(f"Loading fine-tuned model from {self.model_path}...")
+        
+#         from transformers import AutoTokenizer, AutoModelForCausalLM
+        
+#         base_model_name = "vikhyatk/moondream2"
+#         md_revision = "2024-07-23"
+        
+#         self.tokenizer = AutoTokenizer.from_pretrained(
+#             base_model_name,
+#             revision=md_revision,
+#             trust_remote_code=True
+#         )
+        
+#         self.model = AutoModelForCausalLM.from_pretrained(
+#             base_model_name,
+#             revision=md_revision,
+#             trust_remote_code=True,
+#             torch_dtype=torch.float16
+#         )
+        
+#         # Load fine-tuned weights
+#         finetuned_weights = os.path.join(self.model_path, "model.safetensors")
+#         if os.path.exists(finetuned_weights):
+#             from safetensors.torch import load_file
+#             state_dict = load_file(finetuned_weights)
+#             self.model.load_state_dict(state_dict, strict=False)
+        
+#         torch.cuda.empty_cache()
+#         gc.collect()
+#         self.model = self.model.to(self.device)
+#         self.model.eval()
+        
+#         print("✓ Fine-tuned model loaded")
+    
+#     def inference(self, image: Image.Image):
+#         """Run inference"""
+#         question = "Is there fire visible in this image?"
+        
+#         with torch.no_grad():
+#             enc_image = self.model.encode_image(image)
+#             answer = self.model.answer_question(enc_image, question, self.tokenizer)
+        
+#         return answer
+
+class FinetunedMoondream2Benchmark(ModelBenchmark):
+    """Benchmark fine-tuned PyTorch model on CPU (GPU too small on Jetson)"""
+    
+    def __init__(self, model_path: str, device: str = "cpu"):  # ← Force CPU
+        super().__init__("Fine-tuned Moondream2 (CPU)")
         self.model_path = model_path
         self.device = torch.device(device)
         self.load_model()
     
     def load_model(self):
-        """Load fine-tuned model"""
+        """Load fine-tuned model on CPU"""
         print(f"Loading fine-tuned model from {self.model_path}...")
+        print("⚠️ Running on CPU (PyTorch model too large for 8GB Jetson GPU)")
         
         from transformers import AutoTokenizer, AutoModelForCausalLM
         
@@ -196,11 +252,13 @@ class FinetunedMoondream2Benchmark(ModelBenchmark):
             trust_remote_code=True
         )
         
+        # Load on CPU with float32 (FP16 not supported on CPU)
         self.model = AutoModelForCausalLM.from_pretrained(
             base_model_name,
             revision=md_revision,
             trust_remote_code=True,
-            torch_dtype=torch.float16
+            torch_dtype=torch.float32,  # ← CPU needs float32
+            low_cpu_mem_usage=True
         )
         
         # Load fine-tuned weights
@@ -209,16 +267,15 @@ class FinetunedMoondream2Benchmark(ModelBenchmark):
             from safetensors.torch import load_file
             state_dict = load_file(finetuned_weights)
             self.model.load_state_dict(state_dict, strict=False)
+            print("✓ Fine-tuned weights loaded")
         
-        torch.cuda.empty_cache()
-        gc.collect()
-        self.model = self.model.to(self.device)
+        # Keep on CPU
         self.model.eval()
         
-        print("✓ Fine-tuned model loaded")
+        print("✓ Fine-tuned model loaded on CPU")
     
     def inference(self, image: Image.Image):
-        """Run inference"""
+        """Run inference on CPU"""
         question = "Is there fire visible in this image?"
         
         with torch.no_grad():
@@ -226,7 +283,6 @@ class FinetunedMoondream2Benchmark(ModelBenchmark):
             answer = self.model.answer_question(enc_image, question, self.tokenizer)
         
         return answer
-
 
 class QuantizedMoondream2Benchmark(ModelBenchmark):
     """Benchmark TensorRT INT8 quantized model"""
