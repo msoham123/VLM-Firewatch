@@ -1,0 +1,23 @@
+(/home/hice1/smanoli3/scratch/conda/conda_envs/vlm_firewatch_env) [smanoli3@atl1-1-03-013-13-0 quantize]$ python export_onnx.py 
+INFO:__main__:Loading base Moondream2 architecture...
+PhiForCausalLM has generative capabilities, as `prepare_inputs_for_generation` is explicitly overwritten. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+INFO:__main__:Loading fine-tuned weights...
+INFO:__main__:Fine-tuned weights loaded from /home/hice1/smanoli3/scratch/finetuned_moondream/model.safetensors!
+INFO:__main__:Model loaded and ready for ONNX conversion!
+Vision encoder: <class 'transformers_modules.vikhyatk.moondream2.79671eae7b5340017e91065d09c1ce1a352c0e8d.vision_encoder.VisionEncoder'>
+Exporting to ONNX...
+✓ Vision encoder works, output shape: torch.Size([1, 729, 2048])
+/home/hice1/smanoli3/VLM-FireWatch/src/quantize/export_onnx.py:86: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter will be the default. To switch now, set dynamo=True in torch.onnx.export. This new exporter supports features like exporting LLMs with DynamicCache. We encourage you to try it and share feedback to help improve the experience. Learn more about the new export logic: https://pytorch.org/docs/stable/onnx_dynamo.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html.
+  torch.onnx.export(
+/home/hice1/smanoli3/.cache/huggingface/modules/transformers_modules/vikhyatk/moondream2/79671eae7b5340017e91065d09c1ce1a352c0e8d/vision_encoder.py:259: TracerWarning: Iterating over a tensor might cause the trace to be incorrect. Passing a tensor of different shape won't change the number of iterations executed (and might lead to errors or silently give incorrect results).
+  im_list = list(images)
+/home/hice1/smanoli3/.cache/huggingface/modules/transformers_modules/vikhyatk/moondream2/79671eae7b5340017e91065d09c1ce1a352c0e8d/vision_encoder.py:259: TracerWarning: Using len to get tensor shape might cause the trace to be incorrect. Recommended usage would be tensor.shape[0]. Passing a tensor of different shape might lead to errors or silently give incorrect results.
+  im_list = list(images)
+/home/hice1/smanoli3/.cache/huggingface/modules/transformers_modules/vikhyatk/moondream2/79671eae7b5340017e91065d09c1ce1a352c0e8d/vision_encoder.py:195: TracerWarning: Converting a tensor to a Python boolean might cause the trace to be incorrect. We can't record the data flow of Python values, so this value will be treated as a constant in the future. This means that the trace might not generalize to other inputs!
+  if height == patch_height and width == patch_width:
+✓ Exported to: /home/hice1/smanoli3/scratch/moondream2_tuned.onnx
+Size: 1711.74 MB
+✓ ONNX model verified

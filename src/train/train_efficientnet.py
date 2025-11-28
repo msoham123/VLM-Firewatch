@@ -175,7 +175,6 @@ def evaluate_model(model, test_loader, device='cuda'):
 # Main execution for EfficientNet
 if __name__ == '__main__':
     # Configuration
-    DATA_PATH = 'path/to/your/preprocessed/dataset'
     BATCH_SIZE = 32
     NUM_EPOCHS = 1
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

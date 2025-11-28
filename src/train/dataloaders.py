@@ -91,47 +91,29 @@ def create_dataloaders(
         json_path=train_json,
         transform=train_transform,
         mode=mode,
-        return_metadata=True 
+        return_metadata=(mode != "classification")
     )
     
     val_dataset = FireDataset(
         json_path=val_json,
         transform=val_transform,
         mode=mode,
-        return_metadata=True 
+        return_metadata=(mode != "classification") 
     )
     
     test_dataset = FireDataset(
         json_path=test_json,
         transform=val_transform,
         mode=mode,
-        return_metadata=True 
+        return_metadata=(mode != "classification") 
     )
     
     # Create dataloaders
     if mode == 'vqa':
         # Use custom collate function for VQA
-
-        # # ← ADD THIS before creating train_loader
-        # from torch.utils.data import WeightedRandomSampler
-        # train_labels = [1 if item['metadata']['has_fire'] else 0 
-        #             for item in train_dataset.valid_data]
-        # fire_count = sum(train_labels)
-        # nofire_count = len(train_labels) - fire_count
-        
-        # # Weight fire samples 2x more
-        # sample_weights = [2.0 if label == 1 else 1.0 for label in train_labels]
-        
-        # sampler = WeightedRandomSampler(
-        #     weights=sample_weights,
-        #     num_samples=len(train_dataset),
-        #     replacement=True
-        # )
-
         train_loader = DataLoader(
             train_dataset,
             batch_size=batch_size,
-            # sampler=sampler,
             shuffle=True,
             num_workers=num_workers,
             collate_fn=vqa_collate_fn,
