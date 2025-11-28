@@ -171,6 +171,8 @@ dmypy.json
 *.tar.gz
 *.rar
 *.7z
+*.whl
+*.cache
 
 # Logs
 *.log
@@ -237,3 +239,4 @@ mlruns/
 experiments/
 runs/
 checkpoints/
+src/train/slurm/*.out

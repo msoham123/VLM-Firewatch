@@ -11,23 +11,48 @@ import numpy as np
 from PIL import Image
 import json
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from src.data.dataset_configs import unified_config, moondream_config
+from src.train.dataloaders import create_dataloaders
+import random
 
 # Paths
-onnx_path = "/home/hice1/smanoli3/scratch/moondream2_base.onnx"
-trt_engine_path = "/home/hice1/smanoli3/scratch/moondream2_base_int8.engine"
-calibration_json = "/home/hice1/smanoli3/scratch/datasets/unified_dataset/flame_vqa_train.json"
+onnx_path = moondream_config["onnx"]
+trt_engine_path = moondream_config["quantized"]
+calibration_json = os.path.join(unified_config["src"], "flame_vqa_train.json")
 
 IMAGE_SIZE = 378
 
 class ImageCalibrator(trt.IInt8EntropyCalibrator2):
-    def __init__(self, json_path, batch_size=1):  # Use batch_size=1 for calibration
+    def __init__(self, batch_size=1):  # Use batch_size=1 for calibration
         trt.IInt8EntropyCalibrator2.__init__(self)
+
+        num_calibration_images = 5000
         
-        with open(json_path, 'r') as f:
-            data = json.load(f)
+        # Create temporary dataloader just to get image paths
+        train_loader, _, _ = create_dataloaders(
+            train_json=calibration_json,
+            val_json=calibration_json,  # Doesn't matter, we only use train
+            test_json=calibration_json,
+            batch_size=1,
+            num_workers=0,
+            mode='vqa',
+            image_size=378,
+            pin_memory=False
+        )
         
-        self.image_files = [item['metadata']['original_path'] for item in data[:1000]]
-        print(f"Loaded {len(self.image_files)} images for calibration")
+        # Extract all image paths from dataset
+        all_image_paths = []
+        for item in train_loader.dataset.data:
+            all_image_paths.append(item['metadata']['original_path'])
+        
+        # Shuffle and take first N
+        random.seed(42)  # For reproducibility
+        random.shuffle(all_image_paths)
+        self.image_files = all_image_paths[:num_calibration_images]
+        
+        print(f"Loaded {len(self.image_files)} shuffled images for calibration")
         
         self.batch_size = batch_size
         self.current_index = 0
@@ -51,8 +76,8 @@ class ImageCalibrator(trt.IInt8EntropyCalibrator2):
                 
                 img = Image.open(img_path).convert('RGB').resize((IMAGE_SIZE, IMAGE_SIZE))
                 img = np.array(img).astype(np.float32) / 255.0
-                img = (img - [0.485, 0.456, 0.406]) / [0.229, 0.224, 0.225]
-                img = np.transpose(img, (2, 0, 1))
+                img = (img - 0.5) / 0.5
+                img = np.transpose(img, (2, 0, 1))  # ← ADD THIS: HWC to CHW
                 batch.append(img)
             except Exception as e:
                 print(f"Error: {e}")
@@ -119,7 +144,7 @@ config.add_optimization_profile(profile)
 config.set_flag(trt.BuilderFlag.INT8)
 
 print("Setting up calibration...")
-calibrator = ImageCalibrator(calibration_json, batch_size=1)
+calibrator = ImageCalibrator(batch_size=1)
 config.int8_calibrator = calibrator
 
 print("\nBuilding (10-15 min)...\n")

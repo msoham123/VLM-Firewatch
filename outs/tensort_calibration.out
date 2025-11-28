@@ -1,0 +1,384 @@
+(/home/hice1/smanoli3/scratch/conda/conda_envs/vlm_firewatch_env) [smanoli3@atl1-1-03-011-23-0 quantize]$ python convert_tensort.py 
+Checking CUDA...
+Using: NVIDIA H100 80GB HBM3
+
+Building TensorRT INT8 engine...
+[16:54:31] [TRT] [I] [MemUsageChange] Init CUDA: CPU -2, GPU +0, now: CPU 168, GPU 524 (MiB)
+Parsing: /home/hice1/smanoli3/scratch/moondream2_tuned.onnx
+[16:54:40] [TRT] [I] ----------------------------------------------------------------
+[16:54:40] [TRT] [I] ONNX IR version:  0.0.8
+[16:54:40] [TRT] [I] Opset version:    17
+[16:54:40] [TRT] [I] Producer name:    pytorch
+[16:54:40] [TRT] [I] Producer version: 2.8.0
+[16:54:40] [TRT] [I] Domain:           
+[16:54:40] [TRT] [I] Model version:    0
+[16:54:40] [TRT] [I] Doc string:       
+[16:54:40] [TRT] [I] ----------------------------------------------------------------
+✓ ONNX parsed
+
+Input tensor: image
+Setting up calibration...
+Loaded 50198 samples from /home/hice1/smanoli3/scratch/datasets/unified_dataset/flame_vqa_train.json
+Loaded 50198 samples from /home/hice1/smanoli3/scratch/datasets/unified_dataset/flame_vqa_train.json
+Loaded 50198 samples from /home/hice1/smanoli3/scratch/datasets/unified_dataset/flame_vqa_train.json
+Created dataloaders for vqa mode:
+  Train: 50198 samples, 50198 batches
+  Val: 50198 samples, 50198 batches
+  Test: 50198 samples, 50198 batches
+Loaded 5000 shuffled images for calibration
+/home/hice1/smanoli3/VLM-FireWatch/src/quantize/convert_tensort.py:148: DeprecationWarning: Use Deprecated in TensorRT 10.1. Superseded by explicit quantization. instead.
+  config.int8_calibrator = calibrator
+
+Building (10-15 min)...
+
+[16:55:04] [TRT] [I] [MemUsageChange] Init builder kernel library: CPU +717, GPU +8, now: CPU 2811, GPU 536 (MiB)
+[16:55:04] [TRT] [I] Perform graph optimization on calibration graph.
+[16:55:04] [TRT] [I] Local timing cache in use. Profiling results in this builder pass will not be stored.
+[16:55:06] [TRT] [I] Compiler backend is used during engine build.
+[16:55:20] [TRT] [I] Detected 1 inputs and 1 output network tensors.
+[16:55:26] [TRT] [I] Total Host Persistent Memory: 1397408 bytes
+[16:55:26] [TRT] [I] Total Device Persistent Memory: 0 bytes
+[16:55:26] [TRT] [I] Max Scratch Memory: 24124928 bytes
+[16:55:26] [TRT] [I] [BlockAssignment] Started assigning block shifts. This will take 1665 steps to complete.
+[16:55:27] [TRT] [I] [BlockAssignment] Algorithm ShiftNTopDown took 173.004ms to assign 12 blocks to 1665 nodes requiring 200470016 bytes.
+[16:55:27] [TRT] [I] Total Activation Memory: 200470016 bytes
+[16:55:27] [TRT] [I] Total Weights Memory: 1794603520 bytes
+[16:55:27] [TRT] [I] Compiler backend is used during engine execution.
+[16:55:27] [TRT] [I] Engine generation completed in 22.9244 seconds.
+[16:55:28] [TRT] [I] [MemUsageChange] TensorRT-managed allocation in IExecutionContext creation: CPU +1, GPU +191, now: CPU 1, GPU 1902 (MiB)
+[16:55:28] [TRT] [I] Starting Calibration.
+[16:55:28] [TRT] [I]   Calibrated batch 0 in 0.336468 seconds.
+[16:55:28] [TRT] [I]   Calibrated batch 1 in 0.287467 seconds.
+[16:55:29] [TRT] [I]   Calibrated batch 2 in 0.285735 seconds.
+[16:55:29] [TRT] [I]   Calibrated batch 3 in 0.284851 seconds.
+[16:55:29] [TRT] [I]   Calibrated batch 4 in 0.286457 seconds.
+[16:55:30] [TRT] [I]   Calibrated batch 5 in 0.286132 seconds.
+[16:55:30] [TRT] [I]   Calibrated batch 6 in 0.286574 seconds.
+[16:55:30] [TRT] [I]   Calibrated batch 7 in 0.286893 seconds.
+[16:55:31] [TRT] [I]   Calibrated batch 8 in 0.286791 seconds.
+[16:55:31] [TRT] [I]   Calibrated batch 9 in 0.286948 seconds.
+[16:55:31] [TRT] [I]   Calibrated batch 10 in 0.287517 seconds.
+[16:55:31] [TRT] [I]   Calibrated batch 11 in 0.288026 seconds.
+[16:55:32] [TRT] [I]   Calibrated batch 12 in 0.288036 seconds.
+[16:55:32] [TRT] [I]   Calibrated batch 13 in 0.286682 seconds.
+[16:55:32] [TRT] [I]   Calibrated batch 14 in 0.286949 seconds.
+[16:55:33] [TRT] [I]   Calibrated batch 15 in 0.286558 seconds.
+[16:55:33] [TRT] [I]   Calibrated batch 16 in 0.287321 seconds.
+[16:55:33] [TRT] [I]   Calibrated batch 17 in 0.287272 seconds.
+[16:55:34] [TRT] [I]   Calibrated batch 18 in 0.287401 seconds.
+[16:55:34] [TRT] [I]   Calibrated batch 19 in 0.287226 seconds.
+[16:55:34] [TRT] [I]   Calibrated batch 20 in 0.28725 seconds.
+[16:55:35] [TRT] [I]   Calibrated batch 21 in 0.287401 seconds.
+[16:55:35] [TRT] [I]   Calibrated batch 22 in 0.287996 seconds.
+[16:55:35] [TRT] [I]   Calibrated batch 23 in 0.287493 seconds.
+[16:55:35] [TRT] [I]   Calibrated batch 24 in 0.287748 seconds.
+[16:55:36] [TRT] [I]   Calibrated batch 25 in 0.287222 seconds.
+[16:55:36] [TRT] [I]   Calibrated batch 26 in 0.287496 seconds.
+[16:55:36] [TRT] [I]   Calibrated batch 27 in 0.287636 seconds.
+[16:55:37] [TRT] [I]   Calibrated batch 28 in 0.287492 seconds.
+[16:55:37] [TRT] [I]   Calibrated batch 29 in 0.287862 seconds.
+[16:55:37] [TRT] [I]   Calibrated batch 30 in 0.287594 seconds.
+[16:55:38] [TRT] [I]   Calibrated batch 31 in 0.288191 seconds.
+[16:55:38] [TRT] [I]   Calibrated batch 32 in 0.288455 seconds.
+[16:55:38] [TRT] [I]   Calibrated batch 33 in 0.287277 seconds.
+[16:55:39] [TRT] [I]   Calibrated batch 34 in 0.28856 seconds.
+[16:55:39] [TRT] [I]   Calibrated batch 35 in 0.287777 seconds.
+[16:55:39] [TRT] [I]   Calibrated batch 36 in 0.28747 seconds.
+[16:55:39] [TRT] [I]   Calibrated batch 37 in 0.287167 seconds.
+[16:55:40] [TRT] [I]   Calibrated batch 38 in 0.287204 seconds.
+[16:55:40] [TRT] [I]   Calibrated batch 39 in 0.287504 seconds.
+[16:55:40] [TRT] [I]   Calibrated batch 40 in 0.288168 seconds.
+[16:55:41] [TRT] [I]   Calibrated batch 41 in 0.287817 seconds.
+[16:55:41] [TRT] [I]   Calibrated batch 42 in 0.287481 seconds.
+[16:55:41] [TRT] [I]   Calibrated batch 43 in 0.28786 seconds.
+[16:55:42] [TRT] [I]   Calibrated batch 44 in 0.287933 seconds.
+[16:55:42] [TRT] [I]   Calibrated batch 45 in 0.287067 seconds.
+[16:55:42] [TRT] [I]   Calibrated batch 46 in 0.28743 seconds.
+[16:55:42] [TRT] [I]   Calibrated batch 47 in 0.287627 seconds.
+[16:55:43] [TRT] [I]   Calibrated batch 48 in 0.287707 seconds.
+[16:55:43] [TRT] [I]   Calibrated batch 49 in 0.287963 seconds.
+[16:55:43] [TRT] [I]   Calibrated batch 50 in 0.288206 seconds.
+[16:55:44] [TRT] [I]   Calibrated batch 51 in 0.288187 seconds.
+[16:55:44] [TRT] [I]   Calibrated batch 52 in 0.288356 seconds.
+[16:55:44] [TRT] [I]   Calibrated batch 53 in 0.287487 seconds.
+[16:55:45] [TRT] [I]   Calibrated batch 54 in 0.288355 seconds.
+[16:55:45] [TRT] [I]   Calibrated batch 55 in 0.287791 seconds.
+[16:55:45] [TRT] [I]   Calibrated batch 56 in 0.288238 seconds.
+[16:55:46] [TRT] [I]   Calibrated batch 57 in 0.288524 seconds.
+[16:55:46] [TRT] [I]   Calibrated batch 58 in 0.288884 seconds.
+[16:55:46] [TRT] [I]   Calibrated batch 59 in 0.287852 seconds.
+[16:55:46] [TRT] [I]   Calibrated batch 60 in 0.28815 seconds.
+[16:55:47] [TRT] [I]   Calibrated batch 61 in 0.286964 seconds.
+[16:55:47] [TRT] [I]   Calibrated batch 62 in 0.287807 seconds.
+[16:55:47] [TRT] [I]   Calibrated batch 63 in 0.287544 seconds.
+[16:55:48] [TRT] [I]   Calibrated batch 64 in 0.287523 seconds.
+[16:55:48] [TRT] [I]   Calibrated batch 65 in 0.287213 seconds.
+[16:55:48] [TRT] [I]   Calibrated batch 66 in 0.287583 seconds.
+[16:55:49] [TRT] [I]   Calibrated batch 67 in 0.287593 seconds.
+[16:55:49] [TRT] [I]   Calibrated batch 68 in 0.287909 seconds.
+[16:55:49] [TRT] [I]   Calibrated batch 69 in 0.287004 seconds.
+[16:55:49] [TRT] [I]   Calibrated batch 70 in 0.288002 seconds.
+[16:55:50] [TRT] [I]   Calibrated batch 71 in 0.286637 seconds.
+[16:55:50] [TRT] [I]   Calibrated batch 72 in 0.288301 seconds.
+[16:55:50] [TRT] [I]   Calibrated batch 73 in 0.287644 seconds.
+[16:55:51] [TRT] [I]   Calibrated batch 74 in 0.287156 seconds.
+[16:55:51] [TRT] [I]   Calibrated batch 75 in 0.287319 seconds.
+[16:55:51] [TRT] [I]   Calibrated batch 76 in 0.287261 seconds.
+[16:55:52] [TRT] [I]   Calibrated batch 77 in 0.287656 seconds.
+[16:55:52] [TRT] [I]   Calibrated batch 78 in 0.287363 seconds.
+[16:55:52] [TRT] [I]   Calibrated batch 79 in 0.287534 seconds.
+[16:55:53] [TRT] [I]   Calibrated batch 80 in 0.287669 seconds.
+[16:55:53] [TRT] [I]   Calibrated batch 81 in 0.287013 seconds.
+[16:55:53] [TRT] [I]   Calibrated batch 82 in 0.287575 seconds.
+[16:55:53] [TRT] [I]   Calibrated batch 83 in 0.287648 seconds.
+
+... omitted for length
+
+[17:21:10] [TRT] [I]   Calibrated batch 4997 in 0.289166 seconds.
+[17:21:10] [TRT] [I]   Calibrated batch 4998 in 0.289643 seconds.
+Calibration: 5000/5000
+[17:21:10] [TRT] [I]   Calibrated batch 4999 in 0.28923 seconds.
+[17:23:32] [TRT] [I]   Post Processing Calibration data in 141.013 seconds.
+[17:23:32] [TRT] [I] Calibration completed in 1707.56 seconds.
+[17:23:32] [TRT] [I] Writing Calibration Cache for calibrator: TRT-101401-EntropyCalibration2
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.19.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.22.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.22.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1882_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1884_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.0.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.0.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_41_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_43_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.0.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.0.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_100_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_102_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.1.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.1.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_122_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_124_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.23.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1904_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1906_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.23.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1722_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.1.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.1.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_181_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_183_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.2.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.2.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_203_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_205_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1641_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.21.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.19.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.2.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.2.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_262_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_264_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.3.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.3.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_284_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_286_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.20.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.26.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.26.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2147_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2206_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1582_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2125_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.3.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.3.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_343_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_345_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.4.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.4.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_365_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_367_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2149_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2208_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.4.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.4.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_424_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_426_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.5.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.5.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_446_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_448_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.23.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1963_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1965_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.23.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.21.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.19.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.5.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.5.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_505_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_507_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.6.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.6.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_527_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_529_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1742_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1803_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.18.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1823_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.25.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.6.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.6.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_586_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_588_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.7.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.7.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_608_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_610_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1720_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1558_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1825_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.7.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.7.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_667_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_669_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.8.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.8.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_689_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_691_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1987_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.24.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.24.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1985_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.8.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.8.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_748_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_750_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.9.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.9.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_770_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_772_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.21.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1661_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1580_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.22.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2127_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_castHelper_2264_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.9.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.9.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_829_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_831_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.10.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.10.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_851_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_853_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.20.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.10.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.10.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_910_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_912_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.11.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.11.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_932_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_934_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1639_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor /encoder/visual/blocks.26/attn/Slice_output_0, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.11.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.11.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_991_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_993_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.12.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.12.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1013_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1015_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1663_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1801_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.20.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.12.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.12.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1072_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1074_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.13.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.13.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1094_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1096_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.19.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1744_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1560_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.13.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.13.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1153_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1155_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.14.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.14.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1175_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1177_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2044_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2046_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.24.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.24.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.14.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.14.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1234_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1236_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.15.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.15.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1256_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1258_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.25.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.20.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.15.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.15.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1315_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1317_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.16.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.16.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1337_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1339_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2068_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.25.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.25.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2066_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.22.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2230_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.16.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.16.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1396_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1398_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_2228_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.norm.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.17.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.17.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1418_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1420_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.21.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.norm.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.26.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.17.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.17.norm2.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1477_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1479_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.26.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.18.norm1.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.18.norm1.bias_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1499_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor ONNXTRT_Broadcast_1501_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [W] Missing scale and zero-point for tensor encoder.model.visual.blocks.18.norm2.weight_output, expect fall back to non-int8 implementation for any layer consuming or producing given tensor
+[17:23:32] [TRT] [I] Local timing cache in use. Profiling results in this builder pass will not be stored.
+[17:23:32] [TRT] [I] Compiler backend is used during engine build.
+[17:23:46] [TRT] [I] Detected 1 inputs and 1 output network tensors.
+[17:23:46] [TRT] [I] Total Host Persistent Memory: 80 bytes
+[17:23:46] [TRT] [I] Total Device Persistent Memory: 0 bytes
+[17:23:46] [TRT] [I] Max Scratch Memory: 93254144 bytes
+[17:23:46] [TRT] [I] [BlockAssignment] Started assigning block shifts. This will take 1 steps to complete.
+[17:23:46] [TRT] [I] [BlockAssignment] Algorithm ShiftNTopDown took 0.00857ms to assign 1 blocks to 1 nodes requiring 93254144 bytes.
+[17:23:46] [TRT] [I] Total Activation Memory: 93254144 bytes
+[17:23:46] [TRT] [I] Total Weights Memory: 1794600324 bytes
+[17:23:46] [TRT] [I] Compiler backend is used during engine execution.
+[17:23:46] [TRT] [I] Engine generation completed in 14.2901 seconds.
+[17:23:46] [TRT] [I] [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 11 MiB, GPU 1908 MiB
+
+============================================================
+✓ INT8 engine created!
+Output: /home/hice1/smanoli3/scratch/moondream2_tuned_int8.engine
+Size: 1713.13 MB
+============================================================

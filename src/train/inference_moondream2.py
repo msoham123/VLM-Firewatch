@@ -95,12 +95,22 @@ class BaseMoondream2Inference:
             except Exception as e:
                 logger.error(f"Error loading image {img_path}: {e}")
                 pil_images.append(None)
-        
+
+        fixed_question = """
+            Carefully examine this image for any of these wildfire indicators:
+            - Visible flames or fire
+            - Active burning
+            - Glowing embers
+            - Bright orange/red heat
+
+            Answer 'Yes' only if you see clear fire. Answer 'No' for smoke alone, darkness, or unclear scenes.
+            """
+
         # Run inference on each image in the batch
         predictions = []
         for pil_img, question in zip(pil_images, batch['questions']):
             if pil_img is not None:
-                prediction = self.answer_question(pil_img, question)
+                prediction = self.answer_question(pil_img, fixed_question)
                 predictions.append(prediction)
             else:
                 predictions.append("Error")
@@ -181,8 +191,10 @@ class BaseMoondream2Inference:
     def _normalize_answer(self, answer: str) -> str:
         """Normalize answer for comparison"""
         answer = answer.lower().strip()
-        if 'yes' in answer or 'fire' in answer:
+        if 'yes' in answer:
             return 'yes'
+        # if 'yes' in answer or 'fire' in answer:
+        #     return 'yes'
         elif 'no' in answer or 'not' in answer:
             return 'no'
         else:

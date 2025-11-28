@@ -25,20 +25,6 @@ cd /path/to/VLM-FireWatch
 conda env create -f env/environment.yml
 conda activate vlm-firewatch  # or the name specified in environment.yml
 
-# If environment.yml doesn't exist, create environment manually:
-conda create -n vlm-firewatch python=3.9
-conda activate vlm-firewatch
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-pip install transformers datasets timm peft trl wandb tqdm numpy pandas scikit-learn matplotlib seaborn pillow
-```
-
-### Option B: Using pip
-
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-pip install transformers datasets timm peft trl wandb tqdm numpy pandas scikit-learn matplotlib seaborn pillow
-```
-
 ## Step 2: Prepare Datasets
 
 ### 2.1 Download Raw Datasets

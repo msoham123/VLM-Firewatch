@@ -4,7 +4,7 @@
 #SBATCH --mem-per-cpu=65536
 #SBATCH --gres=gpu:H100:1          # Try --gres instead of -G
 #SBATCH -p coe-gpu                 # Specify single partition
-#SBATCH --time=02:00:00
+#SBATCH --time=03:00:00
 #SBATCH -o finetune-md2-%j.out
 #SBATCH -c 2
 

@@ -26,3 +26,5 @@ dependencies:
     - onnx
     - tensorrt-cu12
     - pycuda
+    - wandb
+    - peft
