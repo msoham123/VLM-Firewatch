@@ -110,7 +110,13 @@ class ModelBenchmark:
         print(f"Warming up {self.model_name}...")
         for i in range(self.warmup_runs):
             dummy_img = self.create_dummy_input()
-            self.inference(dummy_img)
+            result = self.inference(dummy_img)
+
+            # Add cleanup
+            del dummy_img, result
+            if hasattr(torch.cuda, 'empty_cache'):
+                torch.cuda.empty_cache()
+            gc.collect()
         print(f"✓ Warmup complete ({self.warmup_runs} runs)")
     
     def benchmark_latency(self) -> Dict:
@@ -126,14 +132,14 @@ class ModelBenchmark:
             self.inference(dummy_img)
             end_time = time.time()
 
+            latency_ms = (end_time - start_time) * 1000
+            latencies.append(latency_ms)
+
             # Critical: cleanup
             del dummy_img
             if hasattr(torch.cuda, 'empty_cache'):
                 torch.cuda.empty_cache()
             gc.collect()
-            
-            latency_ms = (end_time - start_time) * 1000
-            latencies.append(latency_ms)
             
             if (i + 1) % 20 == 0:
                 print(f"  Progress: {i+1}/{self.benchmark_runs} runs")
@@ -318,8 +324,8 @@ class BaseMoondream2Benchmark(ModelBenchmark):
             base_model_name,
             revision=md_revision,
             trust_remote_code=True,
-            torch_dtype=torch.float32,
-            low_cpu_mem_usage=True
+            torch_dtype=torch.float16,
+            device_map="auto",  # ← Key difference
         )
         
         self.model.eval()
@@ -346,10 +352,13 @@ class QuantizedMoondream2Benchmark(ModelBenchmark):
     def load_engine(self):
         """Load TensorRT engine"""
         print(f"Loading TensorRT engine from {self.trt_engine_path}...")
-        
         import tensorrt as trt
         import pycuda.driver as cuda
-        import pycuda.autoinit
+        
+        # Manual context management (no autoinit)
+        cuda.init()
+        self.cuda_device = cuda.Device(0)
+        self.cuda_ctx = self.cuda_device.make_context()
         
         self.logger = trt.Logger(trt.Logger.WARNING)
         
@@ -382,27 +391,37 @@ class QuantizedMoondream2Benchmark(ModelBenchmark):
         """Run TensorRT inference"""
         import pycuda.driver as cuda
         
-        # Preprocess
-        input_data = self.preprocess(image)
+        # Push context before inference
+        self.cuda_ctx.push()
         
-        # Copy to device
-        cuda.memcpy_htod(self.d_input, input_data)
-        
-        # Run inference
-        bindings = [int(self.d_input), int(self.d_output)]
-        self.context.execute_v2(bindings=bindings)
-        
-        # Copy output (optional - just for timing)
-        output_data = np.empty(self.output_shape, dtype=np.float32)
-        cuda.memcpy_dtoh(output_data, self.d_output)
-        self.stream.synchronize()
-        
-        return output_data
+        try:
+            # Preprocess
+            input_data = self.preprocess(image)
+            
+            # Copy to device
+            cuda.memcpy_htod(self.d_input, input_data)
+            
+            # Run inference
+            bindings = [int(self.d_input), int(self.d_output)]
+            self.context.execute_v2(bindings=bindings)
+            
+            # Copy output
+            output_data = np.empty(self.output_shape, dtype=np.float32)
+            cuda.memcpy_dtoh(output_data, self.d_output)
+            self.stream.synchronize()
+            
+            return output_data
+        finally:
+            # Always pop context
+            self.cuda_ctx.pop()
 
     def cleanup(self):
         self.d_input.free()
         self.d_output.free()
-        self.cuda_ctx.pop()
+        if hasattr(self, 'cuda_ctx'):
+            self.cuda_ctx.pop()
+            self.cuda_ctx.detach()
+        
 
 def print_results(results: Dict, model_name: str):
     """Pretty print benchmark results"""
@@ -444,7 +463,7 @@ def main():
     parser.add_argument("--trt_engine", type=str,
                        default="/home/hparch/smanoli3/moondream2_tuned_int8.engine",
                        help="Path to TensorRT engine file")
-    parser.add_argument("--runs", type=int, default=5000,
+    parser.add_argument("--runs", type=int, default=100,
                        help="Number of benchmark runs")
     parser.add_argument("--warmup", type=int, default=10,
                        help="Number of warmup runs")
@@ -497,6 +516,7 @@ def main():
             
             print_results(finetuned_results, "Fine-tuned Moondream2")
             results['finetuned'] = finetuned_results
+            benchmark.cleanup()
         else:
             print(f"⚠️ Fine-tuned model not found at {args.finetuned_path}")
     
@@ -518,11 +538,13 @@ def main():
             
             print_results(quantized_results, "Quantized Moondream2 (INT8)")
             results['quantized'] = quantized_results
+            benchmark.cleanup()
         else:
             print(f"⚠️ TensorRT engine not found at {args.trt_engine}")
     
     # Comparison
     if 'finetuned' in results and 'quantized' in results:
+        print("✓ TensorRT resources freed")
         print("\n" + "="*70)
         print("COMPARISON")
         print("="*70)
