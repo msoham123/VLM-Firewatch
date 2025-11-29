@@ -125,6 +125,12 @@ class ModelBenchmark:
             start_time = time.time()
             self.inference(dummy_img)
             end_time = time.time()
+
+            # Critical: cleanup
+            del dummy_img
+            if hasattr(torch.cuda, 'empty_cache'):
+                torch.cuda.empty_cache()
+            gc.collect()
             
             latency_ms = (end_time - start_time) * 1000
             latencies.append(latency_ms)
@@ -393,6 +399,10 @@ class QuantizedMoondream2Benchmark(ModelBenchmark):
         
         return output_data
 
+    def cleanup(self):
+        self.d_input.free()
+        self.d_output.free()
+        self.cuda_ctx.pop()
 
 def print_results(results: Dict, model_name: str):
     """Pretty print benchmark results"""
