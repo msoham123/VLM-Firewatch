@@ -227,19 +227,74 @@ class ModelBenchmark:
         
 #         return answer
 
-class FinetunedMoondream2Benchmark(ModelBenchmark):
-    """Benchmark fine-tuned PyTorch model on CPU (GPU too small on Jetson)"""
+# class FinetunedMoondream2Benchmark(ModelBenchmark):
+#     """Benchmark fine-tuned PyTorch model on CPU (GPU too small on Jetson)"""
     
-    def __init__(self, model_path: str, device: str = "cpu"):  # ← Force CPU
-        super().__init__("Fine-tuned Moondream2 (CPU)")
-        self.model_path = model_path
+#     def __init__(self, model_path: str, device: str = "cpu"):  # ← Force CPU
+#         super().__init__("Fine-tuned Moondream2 (CPU)")
+#         self.model_path = model_path
+#         self.device = torch.device(device)
+#         self.load_model()
+    
+#     def load_model(self):
+#         """Load fine-tuned model on CPU"""
+#         print(f"Loading fine-tuned model from {self.model_path}...")
+#         print("⚠️ Running on CPU (PyTorch model too large for 8GB Jetson GPU)")
+        
+#         from transformers import AutoTokenizer, AutoModelForCausalLM
+        
+#         base_model_name = "vikhyatk/moondream2"
+#         md_revision = "2024-07-23"
+        
+#         self.tokenizer = AutoTokenizer.from_pretrained(
+#             base_model_name,
+#             revision=md_revision,
+#             trust_remote_code=True
+#         )
+        
+#         # Load on CPU with float32 (FP16 not supported on CPU)
+#         self.model = AutoModelForCausalLM.from_pretrained(
+#             base_model_name,
+#             revision=md_revision,
+#             trust_remote_code=True,
+#             torch_dtype=torch.float32,  # ← CPU needs float32
+#             low_cpu_mem_usage=True
+#         )
+        
+#         # Load fine-tuned weights
+#         finetuned_weights = os.path.join(self.model_path, "model.safetensors")
+#         if os.path.exists(finetuned_weights):
+#             from safetensors.torch import load_file
+#             state_dict = load_file(finetuned_weights)
+#             self.model.load_state_dict(state_dict, strict=False)
+#             print("✓ Fine-tuned weights loaded")
+        
+#         # Keep on CPU
+#         self.model.eval()
+        
+#         print("✓ Fine-tuned model loaded on CPU")
+    
+#     def inference(self, image: Image.Image):
+#         """Run inference on CPU"""
+#         question = "Is there fire visible in this image?"
+        
+#         with torch.no_grad():
+#             enc_image = self.model.encode_image(image)
+#             answer = self.model.answer_question(enc_image, question, self.tokenizer)
+        
+#         return answer
+
+class BaseMoondream2Benchmark(ModelBenchmark):
+    """Benchmark base Moondream2 (lighter than fine-tuned)"""
+    
+    def __init__(self, device: str = "cpu"):
+        super().__init__("Base Moondream2 (CPU)")
         self.device = torch.device(device)
         self.load_model()
     
     def load_model(self):
-        """Load fine-tuned model on CPU"""
-        print(f"Loading fine-tuned model from {self.model_path}...")
-        print("⚠️ Running on CPU (PyTorch model too large for 8GB Jetson GPU)")
+        """Load base model only (no fine-tuned weights)"""
+        print(f"Loading base Moondream2...")
         
         from transformers import AutoTokenizer, AutoModelForCausalLM
         
@@ -252,27 +307,17 @@ class FinetunedMoondream2Benchmark(ModelBenchmark):
             trust_remote_code=True
         )
         
-        # Load on CPU with float32 (FP16 not supported on CPU)
+        # Load ONLY base model (no fine-tuned weights)
         self.model = AutoModelForCausalLM.from_pretrained(
             base_model_name,
             revision=md_revision,
             trust_remote_code=True,
-            torch_dtype=torch.float32,  # ← CPU needs float32
+            torch_dtype=torch.float32,
             low_cpu_mem_usage=True
         )
         
-        # Load fine-tuned weights
-        finetuned_weights = os.path.join(self.model_path, "model.safetensors")
-        if os.path.exists(finetuned_weights):
-            from safetensors.torch import load_file
-            state_dict = load_file(finetuned_weights)
-            self.model.load_state_dict(state_dict, strict=False)
-            print("✓ Fine-tuned weights loaded")
-        
-        # Keep on CPU
         self.model.eval()
-        
-        print("✓ Fine-tuned model loaded on CPU")
+        print("✓ Base model loaded on CPU")
     
     def inference(self, image: Image.Image):
         """Run inference on CPU"""
@@ -403,6 +448,27 @@ def main():
     
     results = {}
     
+    # # Benchmark fine-tuned model
+    # if args.models in ["finetuned", "both"]:
+    #     if os.path.exists(args.finetuned_path):
+    #         print("\n" + "="*70)
+    #         print("BENCHMARKING FINE-TUNED MODEL")
+    #         print("="*70 + "\n")
+            
+    #         benchmark = FinetunedMoondream2Benchmark(args.finetuned_path)
+    #         benchmark.warmup_runs = args.warmup
+    #         benchmark.benchmark_runs = args.runs
+            
+    #         benchmark.warmup()
+            
+    #         tegrastats = TegrastatsMonitor("tegrastats_finetuned.log")
+    #         finetuned_results = benchmark.benchmark_with_power(tegrastats)
+            
+    #         print_results(finetuned_results, "Fine-tuned Moondream2")
+    #         results['finetuned'] = finetuned_results
+    #     else:
+    #         print(f"⚠️ Fine-tuned model not found at {args.finetuned_path}")
+
     # Benchmark fine-tuned model
     if args.models in ["finetuned", "both"]:
         if os.path.exists(args.finetuned_path):
@@ -410,7 +476,7 @@ def main():
             print("BENCHMARKING FINE-TUNED MODEL")
             print("="*70 + "\n")
             
-            benchmark = FinetunedMoondream2Benchmark(args.finetuned_path)
+            benchmark = BaseMoondream2Benchmark()
             benchmark.warmup_runs = args.warmup
             benchmark.benchmark_runs = args.runs
             
