@@ -96,8 +96,8 @@ class Moondream2Benchmark:
         
         from transformers import AutoTokenizer, AutoModelForCausalLM
         
-        model_id = "moondream/moondream-2b-2025-04-14",
-        revision = "2025-06-21"
+        model_id = "vikhyatk/moondream2"
+        revision = "2024-07-23"
         
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_id,
