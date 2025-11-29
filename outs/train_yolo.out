@@ -1,4 +1,3 @@
-(vlm_firewatch_env) [smanoli3@atl1-1-03-012-23-0 train]$ python train_yolo.py 
 Loaded 50198 samples from /home/hice1/smanoli3/scratch/datasets/unified_dataset/flame_vqa_train.json
 Loaded 10756 samples from /home/hice1/smanoli3/scratch/datasets/unified_dataset/flame_vqa_val.json
 Loaded 10756 samples from /home/hice1/smanoli3/scratch/datasets/unified_dataset/flame_vqa_test.json

@@ -1,4 +1,3 @@
-(vlm_firewatch_env) [smanoli3@atl1-1-03-012-23-0 data]$ python process_datasets.py 
 Generating aggregation plan...
 
 📋 AGGREGATION PLAN

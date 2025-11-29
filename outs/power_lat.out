@@ -1,0 +1,133 @@
+======================================================================
+BENCHMARKING PYTORCH FP16 VISION ENCODER
+======================================================================
+
+Loading PyTorch vision encoder...
+PhiForCausalLM has generative capabilities, as `prepare_inputs_for_generation` is explicitly overwritten. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+✓ Fine-tuned weights loaded
+✓ PyTorch vision encoder loaded on cuda:0
+Warming up PyTorch FP16 Vision Encoder...
+✓ Warmup complete (50 runs)
+
+Benchmarking PyTorch FP16 Vision Encoder with power monitoring...
+Starting nvidia-smi power monitoring (GPU 0)...
+✓ Power monitoring started
+Benchmarking PyTorch FP16 Vision Encoder vision encoding (5000 runs)...
+  Progress: 500/5000 runs
+  Progress: 1000/5000 runs
+  Progress: 1500/5000 runs
+  Progress: 2000/5000 runs
+  Progress: 2500/5000 runs
+  Progress: 3000/5000 runs
+  Progress: 3500/5000 runs
+  Progress: 4000/5000 runs
+  Progress: 4500/5000 runs
+  Progress: 5000/5000 runs
+Stopping power monitoring...
+✓ Power monitoring stopped
+
+======================================================================
+PyTorch FP16 Vision Encoder - BENCHMARK RESULTS
+======================================================================
+
+📊 Latency Metrics:
+  Average: 7.484 ms
+  Min:     6.608 ms
+  Max:     26.244 ms
+  Std Dev: 2.417 ms
+  P50:     6.819 ms
+  P95:     12.127 ms
+  P99:     19.134 ms
+
+🎬 Throughput:
+  FPS: 133.6
+
+⚡ Power Consumption:
+  Average: 347.52 W
+  Min:     230.71 W
+  Max:     359.55 W
+  Samples: 301
+
+🔋 Energy Efficiency:
+  Energy per inference: 2.600673 J
+  Inferences per Wh: 1384
+======================================================================
+
+✓ PyTorch encoder freed
+
+
+======================================================================
+BENCHMARKING TENSORRT INT8 VISION ENCODER
+======================================================================
+
+Loading TensorRT engine from /home/hice1/smanoli3/scratch/moondream2_tuned_int8.engine...
+✓ TensorRT engine loaded
+Warming up TensorRT INT8 Vision Encoder...
+✓ Warmup complete (50 runs)
+
+Benchmarking TensorRT INT8 Vision Encoder with power monitoring...
+Starting nvidia-smi power monitoring (GPU 0)...
+✓ Power monitoring started
+Benchmarking TensorRT INT8 Vision Encoder vision encoding (5000 runs)...
+  Progress: 500/5000 runs
+  Progress: 1000/5000 runs
+  Progress: 1500/5000 runs
+  Progress: 2000/5000 runs
+  Progress: 2500/5000 runs
+  Progress: 3000/5000 runs
+  Progress: 3500/5000 runs
+  Progress: 4000/5000 runs
+  Progress: 4500/5000 runs
+  Progress: 5000/5000 runs
+Stopping power monitoring...
+✓ Power monitoring stopped
+
+======================================================================
+TensorRT INT8 Vision Encoder - BENCHMARK RESULTS
+======================================================================
+
+📊 Latency Metrics:
+  Average: 9.141 ms
+  Min:     8.988 ms
+  Max:     11.049 ms
+  Std Dev: 0.042 ms
+  P50:     9.138 ms
+  P95:     9.193 ms
+  P99:     9.226 ms
+
+🎬 Throughput:
+  FPS: 109.4
+
+⚡ Power Consumption:
+  Average: 529.61 W
+  Min:     327.43 W
+  Max:     542.17 W
+  Samples: 403
+
+🔋 Energy Efficiency:
+  Energy per inference: 4.841177 J
+  Inferences per Wh: 744
+======================================================================
+
+✓ TensorRT encoder freed
+
+
+======================================================================
+VISION ENCODER COMPARISON
+======================================================================
+
+⚡ Speedup: 0.82x faster (TensorRT INT8 vs PyTorch FP16)
+💾 Model size: ~4x smaller (INT8 vs FP16)
+🔋 Power difference: +52.4%
+🎯 Energy efficiency: 0.54x better
+📈 Throughput: 109.4 vs 133.6 FPS
+
+📊 Absolute Numbers:
+  PyTorch FP16:   7.484 ms/image
+  TensorRT INT8:  9.141 ms/image
+  Time saved:     -1.657 ms
+
+✓ Results saved to vision_encoder_benchmark.json

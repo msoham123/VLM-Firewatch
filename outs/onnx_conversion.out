@@ -1,4 +1,3 @@
-(/home/hice1/smanoli3/scratch/conda/conda_envs/vlm_firewatch_env) [smanoli3@atl1-1-03-013-13-0 quantize]$ python export_onnx.py 
 INFO:__main__:Loading base Moondream2 architecture...
 PhiForCausalLM has generative capabilities, as `prepare_inputs_for_generation` is explicitly overwritten. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
   - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes

@@ -1,4 +1,3 @@
-(/home/hice1/smanoli3/scratch/conda/conda_envs/vlm_firewatch_env) [smanoli3@atl1-1-03-011-23-0 quantize]$ python convert_tensort.py 
 Checking CUDA...
 Using: NVIDIA H100 80GB HBM3
 
