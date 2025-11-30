@@ -310,7 +310,7 @@ def main():
                        default=test_json,
                        help="Path to test JSON file")
     parser.add_argument("--output_file", type=str, 
-                       default="src/train/results/inference_results_finetuned.json",
+                       default="results/inference_results_finetuned.json",
                        help="Output file for results")
     parser.add_argument("--device", type=str, default="cuda",
                        help="Device to use (cuda/cpu)")
