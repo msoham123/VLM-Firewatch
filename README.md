@@ -2,7 +2,7 @@
 
 This project proposes the development of a real-time wildfire detection system deployed on a drone equipped with a Jetson Orin Nano. We aim to begin classification of wildfires using a Visual Language Model (VLM). Our first step to achieving this goal is to begin searching for relevant datasets online. Through detailed research, we have decided to proceed with the FLAME dataset and datasets based on it (FLAME3, FlameVision) as well as the Places365 validation set (to prevent class imbalance). These datasets take advantage of sensor fusion and utilize it to combine the IR and feed data. Our first step is to aggregate these 3 datasets together into VQA format (question-answer, as shown below) such that our eventual model can classify images into fire being present and no fire being present.
 
-![Overview](src/visualize/graphs/vlm_arch.png)
+![Overview](src/visualize/graphs/vlm_arch_bg.png)
 
 ## 0 - Creating a `conda` environment
 
@@ -291,7 +291,7 @@ python create_power_graphs.py
 
 ## Other Notes
 
-- We used SLURM heavily for model training/inference due to time needed for both
+- We used SLURM heavily for model training/inference due to time needed for both.
 - We also tried object detection to explore how that performed. The scripts and code can be found in `src/train`. We do not provide support for them explicitly as they serve as an exploration rather than result.
 - Saved model weights for the tuned classifiers can be found in `src/train/models`.
 - We provide proof of work in the `outs` folder. You may use this as reference to compare with your outputs when running the code.
