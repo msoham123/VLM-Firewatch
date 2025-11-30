@@ -1,0 +1,32 @@
+{
+  "finetuned": {
+    "avg_latency_ms": 125.91377973556519,
+    "min_latency_ms": 124.19939041137695,
+    "max_latency_ms": 144.0298557281494,
+    "std_latency_ms": 1.3149291882345437,
+    "p50_latency_ms": 125.7399320602417,
+    "p95_latency_ms": 127.5118350982666,
+    "p99_latency_ms": 131.57875299453735,
+    "fps": 7.941942510979546,
+    "avg_power_w": 242.12955980861244,
+    "min_power_w": 206.69,
+    "max_power_w": 251.98,
+    "samples": 1045,
+    "energy_per_inference_j": 30.487448061210983
+  },
+  "quantized": {
+    "avg_latency_ms": 9.178607940673828,
+    "min_latency_ms": 9.078264236450195,
+    "max_latency_ms": 11.008262634277344,
+    "std_latency_ms": 0.06798670877100592,
+    "p50_latency_ms": 9.183883666992188,
+    "p95_latency_ms": 9.218692779541016,
+    "p99_latency_ms": 9.247627258300781,
+    "fps": 108.94898294638207,
+    "avg_power_w": 498.88702380952367,
+    "min_power_w": 225.31,
+    "max_power_w": 540.79,
+    "samples": 84,
+    "energy_per_inference_j": 4.579088398237227
+  }
+}

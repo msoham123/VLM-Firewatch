@@ -137,7 +137,6 @@ dmypy.json
 **/runs/
 
 # Dataset files (these are large)
-*.json
 *.csv
 *.parquet
 *.feather
@@ -194,10 +193,8 @@ Thumbs.db
 .temp/
 
 # Results and outputs
-results/
 outputs/
 inference_results/
-moondream2_inference_results.json
 
 # Conda
 .conda/

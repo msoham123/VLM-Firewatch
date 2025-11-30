@@ -1,0 +1,32 @@
+{
+  "pytorch_fp16": {
+    "avg_latency_ms": 7.483571863174438,
+    "min_latency_ms": 6.607770919799805,
+    "max_latency_ms": 26.24368667602539,
+    "std_latency_ms": 2.4167858778622175,
+    "p50_latency_ms": 6.818890571594238,
+    "p95_latency_ms": 12.127196788787844,
+    "p99_latency_ms": 19.13413763046265,
+    "fps": 133.6260302277384,
+    "avg_power_w": 347.51760797342195,
+    "min_power_w": 230.71,
+    "max_power_w": 359.55,
+    "samples": 301,
+    "energy_per_inference_j": 2.600672992987585
+  },
+  "tensorrt_int8": {
+    "avg_latency_ms": 9.141045093536377,
+    "min_latency_ms": 8.987903594970703,
+    "max_latency_ms": 11.048555374145508,
+    "std_latency_ms": 0.04197989544571022,
+    "p50_latency_ms": 9.137511253356934,
+    "p95_latency_ms": 9.193181991577148,
+    "p99_latency_ms": 9.226083755493164,
+    "fps": 109.39668164497941,
+    "avg_power_w": 529.6086600496279,
+    "min_power_w": 327.43,
+    "max_power_w": 542.17,
+    "samples": 403,
+    "energy_per_inference_j": 4.841176643441027
+  }
+}
